@@ -11,7 +11,7 @@ import paint from "../assets/paints.jpg";
 import scl1 from "../assets/scl1.jfif";
 import slide from "../assets/slide1.jpg";
 import wart from "../assets/wart.jpg";
-
+import "../welcome.css"
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/effect-coverflow";

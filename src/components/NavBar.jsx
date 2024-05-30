@@ -9,7 +9,7 @@ import { getIsAuthenticated, logout } from "../features/auth/authSlice";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const isAuthenticated = useSelector(getIsAuthenticated); 
+  const isAuthenticated = useSelector(getIsAuthenticated);
   const dispatch = useDispatch();
 
   const handleClick = () => {
@@ -17,7 +17,7 @@ const NavBar = () => {
   };
 
   const handleLogout = () => {
-    dispatch(logout()); 
+    dispatch(logout());
   };
 
   return (
@@ -30,7 +30,10 @@ const NavBar = () => {
           <ul className="hidden md:flex items-center gap-3">
             {navLink.map((item, index) => (
               <li key={index}>
-                <NavLink to={item.path} className="text-textColor text-sm font-sembold">
+                <NavLink
+                  to={item.path}
+                  className="text-textColor text-sm font-sembold"
+                >
                   {item.name}
                 </NavLink>
               </li>
@@ -38,7 +41,7 @@ const NavBar = () => {
           </ul>
           {isOpen && (
             <ul
-              className="shadow-md bg-secondary flex flex-col p-2 items-center gap-3 absolute top-20 left-0 w-full"
+              className="shadow-md bg-secondary flex flex-col p-2 items-center gap-3 absolute top-20 left-0 !w-full"
               onClick={handleClick}
             >
               {navLink.map((item, index) => (
@@ -54,9 +57,18 @@ const NavBar = () => {
             </ul>
           )}
           {isAuthenticated ? (
-            <Button title="Logout" click={handleLogout} />
+            <Button
+              title="Logout"
+              click={handleLogout}
+              styles={`lg:!text-black lg:hover:!bg-textColor1 lg:hover:!border-textColor1`}
+            />
           ) : (
-            <Button path="/login" title="Login" styles={`!border-black`} />
+            <Button
+              path="/login"
+              title="Login"
+              styles={`lg:!text-black lg:hover:!bg-textColor1 lg:hover:!border-textColor1`}
+
+            />
           )}
           <div
             className="md:hidden p-2 rounded-md text-secondary cursor-pointer bg-primary"
