@@ -30,7 +30,7 @@ const NavBar = () => {
           <ul className="hidden md:flex items-center gap-3">
             {navLink.map((item, index) => (
               <li key={index}>
-                <NavLink to={item.path} className="text-textColor  text-sm font-medium">
+                <NavLink to={item.path} className="text-textColor text-sm font-sembold">
                   {item.name}
                 </NavLink>
               </li>
@@ -56,7 +56,7 @@ const NavBar = () => {
           {isAuthenticated ? (
             <Button title="Logout" click={handleLogout} />
           ) : (
-            <Button path="/login" title="Login" />
+            <Button path="/login" title="Login" styles={`!border-black`} />
           )}
           <div
             className="md:hidden p-2 rounded-md text-secondary cursor-pointer bg-primary"

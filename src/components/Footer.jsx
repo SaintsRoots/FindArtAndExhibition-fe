@@ -1,3 +1,9 @@
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaTwitter,
+  FaWhatsapp,
+} from "react-icons/fa";
 import { getCurrentYear } from "../utils/CurrentYear";
 import { Link } from "react-router-dom";
 import Input from "./form/Input";
@@ -26,7 +32,11 @@ const Footer = () => {
               <p>
                 If you need any assistance or have any questions about how to
                 use our site, we're here to help. Please feel free to reach out
-                to our support team at   <span className="text-blue-700 font-black ">imigongo@gmail.com</span> or call us at (+250) 784404173
+                to our support team at{" "}
+                <span className="text-blue-700 font-black ">
+                  imigongo@gmail.com
+                </span>{" "}
+                or call us at (+250) 784404173
               </p>
             </div>
           </div>
@@ -37,7 +47,12 @@ const Footer = () => {
                 Any questions? Let us know , Kayonza-Mukarange, Nyagatovu You
                 can call us on (+250) 784404173
               </p>
-              <div className="flex"></div>
+              <div className="flex gap-2 font-bold text-2xl cursor-pointer text-secondary transition-all ">
+                <FaInstagram className="p-1 bg-primary rounded-sm hover:scale-110 hover:bg-textColor1" />
+                <FaWhatsapp className="p-1 bg-primary rounded-sm hover:scale-110 hover:bg-textColor1" />
+                <FaTwitter className="p-1 bg-primary rounded-sm hover:scale-110 hover:bg-textColor1" />
+                <FaFacebookF className="p-1 bg-primary rounded-sm hover:scale-110 hover:bg-textColor1" />
+              </div>
             </div>
           </div>
           <div className="flex flex-col gap-4">

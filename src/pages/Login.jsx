@@ -43,7 +43,7 @@ function Login() {
   }, [isAuthenticated, isAdmin, navigate]);
 
   return (
-    <div className="bg-secondary w-full flex justify-center items-center">
+    <div className="bg-secondary w-full min-h-screen mt-8 flex justify-center items-center">
       <div className="w-full flex flex-col justify-center items-center">
         <div className="bg-white w-full md:w-1/2 h-620 rounded-sm flex justify-center items-center py-10 shadow-md">
           <form
@@ -51,7 +51,7 @@ function Login() {
             onSubmit={formik.handleSubmit}
           >
             <h2 className="text-2xl lx:text-4xl font-extrabold text-primary">
-              ETITE Ltd
+              Online Art Finder and exhibition
             </h2>
             {loginError && (
               <div className="text-sm text-red-800 font-normal mt-2">
@@ -104,7 +104,7 @@ function Login() {
                 Forgot password ?
               </Link>
               <div>
-                If you dont have account signup {" "}
+                If you dont have account signup{" "}
                 <Link to="/signup" className="hover:underline text-[#3558D4]">
                   here
                 </Link>

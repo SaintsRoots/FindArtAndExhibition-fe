@@ -68,7 +68,7 @@ function Signup() {
   };
 
   return (
-    <div className="bg-secondary w-full flex justify-center items-center">
+    <div className="bg-secondary w-full min-h-screen mt-8 flex flex-col justify-center items-center">
       <div className="w-full flex flex-col justify-center items-center">
         <div className="bg-white w-full md:w-1/2 h-620 rounded-sm flex justify-center items-center py-10 shadow-md">
           <form
@@ -76,44 +76,46 @@ function Signup() {
             onSubmit={formik.handleSubmit}
           >
             <h2 className="text-2xl lx:text-4xl font-extrabold text-primary">
-              ETITE Ltd
+              Online Art Finder and exhibition
             </h2>
             {loginError && (
               <div className="text-sm text-red-800 font-normal mt-2">
                 {loginError.message ? loginError.message : loginError}
               </div>
             )}
-            <div className="mt-6 mdl:mt-[34px] w-full">
-              <Input
-                type="input"
-                placeholder="Username"
-                id="name"
-                icon={<FaUser />}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                values={formik.values.name}
-              />
-              {formik.touched.name && formik.errors.name && (
-                <p className="text-sm text-red-800 font-normal">
-                  {formik.errors.name}
-                </p>
-              )}
-            </div>
-            <div className="mt-6 mdl:mt-[34px] w-full">
-              <Input
-                type="input"
-                placeholder="Email"
-                id="email"
-                icon={<FaEnvelope />}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                values={formik.values.email}
-              />
-              {formik.touched.email && formik.errors.email && (
-                <p className="text-sm text-red-800 font-normal">
-                  {formik.errors.email}
-                </p>
-              )}
+            <div className="flex items-center gap-2">
+              <div className="mt-6 mdl:mt-[34px] w-full">
+                <Input
+                  type="input"
+                  placeholder="Username"
+                  id="name"
+                  icon={<FaUser />}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  values={formik.values.name}
+                />
+                {formik.touched.name && formik.errors.name && (
+                  <p className="text-sm text-red-800 font-normal">
+                    {formik.errors.name}
+                  </p>
+                )}
+              </div>
+              <div className="mt-6 mdl:mt-[34px] w-full">
+                <Input
+                  type="input"
+                  placeholder="Email"
+                  id="email"
+                  icon={<FaEnvelope />}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  values={formik.values.email}
+                />
+                {formik.touched.email && formik.errors.email && (
+                  <p className="text-sm text-red-800 font-normal">
+                    {formik.errors.email}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="mt-6 mdl:mt-[34px] w-full">
               <Input
