@@ -29,7 +29,7 @@ function Login() {
     onSubmit: forgot,
   });
   return (
-    <div className="bg-secondary w-full  flex justify-center items-center">
+    <div className="bg-secondary w-full min-h-screen mt-8 flex justify-center items-center">
       <div className="w-full flex flex-col justify-center items-center">
         <div className="bg-white w-[90%] md:w-1/2 h-620 rounded-sm flex justify-center items-center py-10 shadow-md">
 
