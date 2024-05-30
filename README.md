@@ -1,25 +1,25 @@
-### Event Management Platform: Front End
+### Online Art Finder and Exhibition: Front End
 
 #### Overview
-This repository contains the source code for the Event Management Platform, an application designed to facilitate event browsing, ticket booking, and event management. This platform helps users to manage their event attendance and allows administrators to oversee and control event listings and bookings.
+This repository contains the source code for the Online Art Finder and Exhibition platform, an application designed to facilitate browsing, purchasing, and managing art products made in Rwanda (Ubugeni). This platform helps users explore and buy unique art pieces while allowing administrators to oversee and control product listings and orders.
 
 #### Features
 
-- **Event Listing and Details**
-  - Display a curated list of upcoming company-organized events.
-  - Include critical event details such as title, date, location, and ticket availability.
+- **Art Product Listing and Details**
+  - Display a curated list of available art products made in Rwanda.
+  - Include critical product details such as title, artist, price, and availability.
 
-- **Ticket Booking**
-  - Feature an interface for users to select and book a specified number of tickets.
-  - Simplify the booking process to ensure user-friendliness.
+- **Product Purchase**
+  - Feature an interface for users to select and purchase a specified number of art pieces.
+  - Simplify the purchasing process to ensure user-friendliness.
 
 - **User Dashboard**
-  - Enable users to view their booked events.
-  - Allow users to cancel their bookings as necessary.
+  - Enable users to view their purchased products.
+  - Allow users to manage their orders as necessary.
 
 - **Admin Dashboard**
-  - Provide a dedicated admin dashboard for event management accessible only by administrators.
-  - Admin functionalities include adding, editing, and deleting event listings, and managing bookings.
+  - Provide a dedicated admin dashboard for product management accessible only by administrators.
+  - Admin functionalities include adding, editing, and deleting product listings, and managing orders.
 
 - **UI/UX**
   - Utilize Tailwind CSS for styling to ensure a consistent and clean aesthetic.
@@ -38,7 +38,7 @@ This repository contains the source code for the Event Management Platform, an a
 
 - **Backend**
   - **MERN Stack**: Comprising MongoDB, Express.js, React.js, and Node.js.
-  - **MongoDB**: Utilized as the NoSQL database for storing event and booking data.
+  - **MongoDB**: Utilized as the NoSQL database for storing product and order data.
   - **Express.js & Node.js**: Serve as the backend framework and runtime environment, respectively.
 
 #### Project Structure
@@ -49,14 +49,14 @@ This repository contains the source code for the Event Management Platform, an a
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/muhozajohn/etite-ltd-eventmanagment-fe.git
-   cd etite-ltd-eventmanagment-fe
+   git clone https://github.com/muhozajohn/online-art-finder.git
+   cd online-art-finder
    ```
 
 2. **Install Dependencies**
    - For frontend:
      ```bash
-     cd etite-ltd-eventmanagment-fe
+     cd online-art-finder
      npm install
      ```
 
@@ -66,10 +66,9 @@ This repository contains the source code for the Event Management Platform, an a
 4. **Run the Application**
    - In a new terminal, start the frontend application:
      ```bash
-      cd etite-ltd-eventmanagment-fe
-     npm run start
+     cd online-art-finder
+     npm start
      ```
 
 5. **Access the Application**
    - The frontend will be available at `http://localhost:3000`
- 
