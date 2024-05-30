@@ -28,16 +28,10 @@ const Footer = () => {
           <div className="flex flex-col gap-4">
             <h1 className=" uppercase font-semibold ">Help</h1>
             <div className="flex flex-col gap-2 text-[12px]">
-              <Link to="/shop">Shoping</Link>
-              <p>
-                If you need any assistance or have any questions about how to
-                use our site, we're here to help. Please feel free to reach out
-                to our support team at{" "}
-                <span className="text-blue-700 font-black ">
-                  imigongo@gmail.com
-                </span>{" "}
-                or call us at (+250) 784404173
-              </p>
+              <p>Shipping</p>
+             <p>Track Order</p>
+             <p>Returns</p>
+             <p>Faqs</p>
             </div>
           </div>
           <div className="flex flex-col gap-4">
@@ -66,7 +60,7 @@ const Footer = () => {
               />
               <Button
                 title="Subscribe"
-                styles={`!scale-100 bg-primary text-secondary`}
+                styles={`!scale-100 bg-primary text-white`}
               />
             </div>
           </div>
