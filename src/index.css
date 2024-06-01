@@ -49,3 +49,11 @@ img {
   stroke-dasharray: 125.6;
   transform: rotate(-90deg);
 }
+
+.group:hover .buttons-container {
+  display: flex;
+}
+
+.buttons-container {
+  display: none;
+}
