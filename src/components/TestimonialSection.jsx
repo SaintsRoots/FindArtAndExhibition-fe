@@ -25,7 +25,7 @@ const TestimonialSection = () => {
           <h2 className="text-2xl font-bold uppercase ">Customer Testmonial</h2>
           <small className=" !text-center ">Our Lovely Customer</small>
         </div>
-        <article className="w-full md:w-1/2 mx-auto p-2  ">
+        <article className="w-full lg:w-1/2 mx-auto p-2  ">
           <Swiper
             spaceBetween={30}
             centeredSlides={true}
