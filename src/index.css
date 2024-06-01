@@ -6,8 +6,13 @@
 
 * {
   font-family: "Poppins", sans-serif;
+  scroll-behavior: smooth;
 }
-
+img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+}
 .bg {
   background: url("./assets/bg-3.jpg");
   background-repeat: no-repeat;

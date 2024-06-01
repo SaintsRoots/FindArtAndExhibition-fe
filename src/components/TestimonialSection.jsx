@@ -21,7 +21,10 @@ const TestimonialSection = () => {
   return (
     <div className="bg-textColor1  min-h-screen flex flex-col gap-4 md:gap-14 items-start justify-center ">
       <div className="container mx-auto px-6 md:px-12 flex flex-col gap-4 justify-center items-center">
-        <h2 className="text-2xl font-bold uppercase ">Customer Testmonial</h2>
+        <div className="flex items-center flex-col ">
+          <h2 className="text-2xl font-bold uppercase ">Customer Testmonial</h2>
+          <small className=" !text-center ">Our Lovely Customer</small>
+        </div>
         <article className="w-full md:w-1/2 mx-auto p-2  ">
           <Swiper
             spaceBetween={30}

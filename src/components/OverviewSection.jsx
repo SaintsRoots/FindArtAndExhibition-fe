@@ -12,6 +12,7 @@ import Photography from "./Photography";
 import Sculpture from "./Sculpture";
 import Graphics3D from "./Graphics3D";
 import { useState } from "react";
+import Button from "./form/Button";
 const OverviewSection = () => {
   const [currentPath, setCurrentPath] = useState("All Arts");
   const [isOpen, setIsOpen] = useState(false);
@@ -44,7 +45,7 @@ const OverviewSection = () => {
     }
   };
   return (
-    <div className="container mx-auto px-6 md:px-12  min-h-screen flex flex-col gap-4 md:gap-14 items-start justify-center ">
+    <div className="container mx-auto px-6 md:px-12  min-h-screen pt-4 pb-4 flex flex-col gap-4 md:gap-14 items-start justify-center ">
       <div className="flex flex-col gap-2">
         <h1 className=" text-2xl font-bold uppercase ">ARTS OVERVIEW</h1>
         <div className="flex justify-between items-center relative">
@@ -106,6 +107,7 @@ const OverviewSection = () => {
         </div>
       </div>
       <div className="flex flex-col gap-1">{renderComponent()}</div>
+      <Button title={`Get More Arts`} styles={`!mx-auto`} path={`/shop`} />
     </div>
   );
 };
