@@ -12,6 +12,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import Blog from "../pages/Blog";
 import Signup from "../pages/Signup";
 import Dashboard from "../components/dashboard/Dashboard";
+import SingleArts from "../components/SingleArts";
 
 const AppRoutes = () => {
   return (
@@ -24,6 +25,7 @@ const AppRoutes = () => {
           <Route path="/forgot-password" element={<Forgot />} />
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/:single" element={<SingleArts />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<NotFound />} />
         </Route>
