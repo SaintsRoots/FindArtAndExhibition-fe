@@ -1,9 +1,9 @@
 import Button from "../components/form/Button";
 import { FaCartPlus } from "react-icons/fa";
 
-const ArtsCard = ({ name, price, image, key, money, click }) => {
+const ArtsCard = ({ name, price, image,  money, click }) => {
   return (
-    <div className="flex flex-col gap-4 relative group" key={key}>
+    <div className="flex flex-col gap-4 relative group" >
       <div className="max-h-[300px] overflow-hidden">
         <img src={image} alt={name} className="aspect-square" />
       </div>
@@ -21,7 +21,7 @@ const ArtsCard = ({ name, price, image, key, money, click }) => {
       <div className="buttons-container flex h-[80%] w-full justify-center absolute left-0 items-end">
         <Button
           title={`Quick View`}
-          path={name}
+          path={name || click}
           styles={`text-nowrap bg-white text-textColor !rounded-full`}
         />
       </div>

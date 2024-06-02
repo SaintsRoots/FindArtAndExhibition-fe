@@ -13,6 +13,8 @@ import Blog from "../pages/Blog";
 import Signup from "../pages/Signup";
 import Dashboard from "../components/dashboard/Dashboard";
 import SingleArts from "../components/SingleArts";
+import Artist from "../components/Artist";
+import Shop from "../components/Shop";
 
 const AppRoutes = () => {
   return (
@@ -25,7 +27,11 @@ const AppRoutes = () => {
           <Route path="/forgot-password" element={<Forgot />} />
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
-          <Route path="/:single" element={<SingleArts />} />
+          <Route path="/artist" element={<Artist />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/shop/:name" element={<SingleArts />} />
+          <Route path="/:name" element={<SingleArts />} />
+
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<NotFound />} />
         </Route>
