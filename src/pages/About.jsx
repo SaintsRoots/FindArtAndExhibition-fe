@@ -5,15 +5,12 @@ const About = () => {
     <div className="container mx-auto px-6 md:px-14 min-h-screen pt-14 pb-14 mt-14  flex flex-col gap-12 justify-center">
       <div className="flex flex-col gap-3 items-center justify-center">
         <h1 className="text-4xl font-bold">About Us</h1>
-        <p className="w-full md:w-2/3 md:text-center  mx-auto ">
-          Welcome to Online Art Finder and exhibition your one-stop destination
-          for exquisite, handcrafted art pieces. We believe that art has the
-          power to transform spaces and inspire individuals. Our mission is to
-          connect talented artists with art enthusiasts who appreciate the
-          beauty and craftsmanship of unique creations.
+        <p className="w-full md:w-2/3 text-center  mx-auto ">
+          Our mission is to connect talented artists with art enthusiasts who
+          appreciate the beauty and craftsmanship of unique creations.
         </p>
       </div>
-      <div className="flex flex-col lg:flex-row items-start   gap-6 ">
+      <div className="flex flex-col md:flex-row items-start   gap-6 ">
         <div className="flex flex-col w-full md:w-8/12 pr-0 md:pr-4  gap-4">
           <h1 className="text-2xl font-bold">Our Story</h1>
           <p>
@@ -21,9 +18,9 @@ const About = () => {
             their heart and soul into their creations. We noticed that many
             talented artists struggled to find a platform that truly showcased
             their work and reached a wider audience. This observation sparked
-            the idea of Artistry Haven, an online marketplace dedicated to
-            connecting these artists with people who appreciate the uniqueness
-            and beauty of handmade art.
+            the idea of Online Art Finder and exhibition, an online marketplace
+            dedicated to connecting these artists with people who appreciate the
+            uniqueness and beauty of handmade art.
           </p>
           <p className="border-l-8 border-gray-600 italic pl-2 ">
             As we continue to grow, our commitment to these principles remains
@@ -47,7 +44,7 @@ const About = () => {
           />
         </div>
       </div>
-      <div className="flex flex-col-reverse lg:flex-row items-start  gap-6 ">
+      <div className="flex flex-col-reverse md:flex-row items-start  gap-6 ">
         <div className="w-full relative md:w-5/12 ">
           <div className="absolute w-full h-full border-4 border-gray-500 left-3 md:left-6 top-4 -z-10 "></div>
 
