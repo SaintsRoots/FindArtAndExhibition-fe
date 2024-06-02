@@ -5,7 +5,7 @@ const ArtsCard = ({ name, price, image,  money, click }) => {
   return (
     <div className="flex flex-col gap-4 relative group" >
       <div className="max-h-[300px] overflow-hidden">
-        <img src={image} alt={name} className="aspect-square" />
+        <img src={image} alt={name} className="aspect-square duration-100 " />
       </div>
       <div className="flex justify-between items-start gap-2">
         <div className="flex flex-col leading-6">

@@ -84,7 +84,7 @@ const OverviewSection = () => {
           </div>
           {isOpen && (
             <ul
-              className="shadow-md bg-secondary  flex flex-col p-2 items-center gap-3 absolute top-12 left-0 w-full flex-grow "
+              className="shadow-md bg-secondary z-10  flex flex-col p-2 items-center gap-3 absolute top-12 left-0 w-full flex-grow "
               onClick={handleClick}
             >
               {filterBar.map((item, index) => (
