@@ -58,6 +58,15 @@ img {
   cursor: pointer;
 }
 
-.buttons-container {
+.buttons-container,
+.contents {
   display: none;
+}
+
+.group:hover .overLAY {
+  background-color: rgba(0, 0, 0, 0.8);
+  cursor: pointer !important;
+}
+.group:hover .contents {
+  display: block !important;
 }
