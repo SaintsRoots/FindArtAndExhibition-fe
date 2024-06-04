@@ -47,7 +47,10 @@ const OverviewSection = () => {
   return (
     <div className="container mx-auto px-6 md:px-12  min-h-screen pt-4 pb-4 flex flex-col gap-4 md:gap-14 items-start justify-center ">
       <div className="flex flex-col gap-2">
-        <h1 className=" text-2xl font-bold uppercase ">ARTS OVERVIEW</h1>
+        <h1 className=" text-2xl font-bold uppercase ">
+          Entire arts Of Your <span className="text-primary">Choice</span>
+        </h1>
+
         <div className="flex justify-between items-center relative">
           <ul className=" hidden lg:flex gap-4 items-center text-sm">
             {filterBar.map((item) => (
@@ -106,8 +109,12 @@ const OverviewSection = () => {
           )}
         </div>
       </div>
-      <div className="flex flex-col gap-1">{renderComponent()}</div>
-      <Button title={`Load More ...`} styles={`!mx-auto !rounded-full`} path={`/shop`} />
+      <div className="w-full flex flex-col gap-1">{renderComponent()}</div>
+      <Button
+        title={`Load More ...`}
+        styles={`!mx-auto !rounded-full`}
+        path={`/shop`}
+      />
     </div>
   );
 };
