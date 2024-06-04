@@ -4,6 +4,9 @@ class artsDataService {
   getAll() {
     return http.get("/arts");
   }
+  getByName(name) {
+    return http.get(`/arts/name/${name}`);
+  }
 
   get(id) {
     return http.get(`/arts/${id}`);
