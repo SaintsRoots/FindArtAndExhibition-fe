@@ -31,7 +31,7 @@ const About = () => {
           </p>
           <p>
             Any questions? Let us know in store or call us on{" "}
-            <span className="text-primary">(+250) 784404173</span>
+            <span className="text-primary">(+250) 784 404 173</span>
           </p>
         </div>
         <div className="w-full relative md:w-5/12 ">

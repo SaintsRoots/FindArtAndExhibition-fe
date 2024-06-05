@@ -39,7 +39,7 @@ const Footer = () => {
             <div className="flex flex-col gap-2 text-[12px]">
               <p>
                 Any questions? Let us know , Kayonza-Mukarange, Nyagatovu You
-                can call us on (+250) 784404173
+                can call us on (+250) 784 404 173
               </p>
               <div className="flex gap-2 font-bold text-2xl cursor-pointer text-secondary transition-all ">
                 <FaInstagram className="p-1 bg-primary rounded-sm hover:scale-110 hover:bg-textColor1" />
