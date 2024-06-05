@@ -31,7 +31,7 @@ const AppRoutes = () => {
           <Route path="/shop" element={<Shop />} />
           <Route path="/shop/:name" element={<SingleArts />} />
           <Route path="/:name" element={<SingleArts />} />
-          <Route path="/blog/:name" element={<SingleArts />} />
+          <Route path="/blog/:name" element={<Shop />} />
 
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<NotFound />} />
