@@ -4,6 +4,7 @@ import artsService from "../../services/arts.services";
 const initialState = {
   arts: [],
   loading: false,
+  currentArt: null,
   error: null,
 };
 
@@ -19,7 +20,7 @@ export const getAllArts = createAsyncThunk("arts/getAllArts", async () => {
 export const getArtsByName = createAsyncThunk(
   "arts/getArtsByName",
   async (name) => {
-    const response = await artsService.getByCategory(name);
+    const response = await artsService.getByName(name);
     return response.data.data;
   }
 );
@@ -55,7 +56,7 @@ export const artsSlice = createSlice({
       })
       .addCase(getArtsByName.fulfilled, (state, action) => {
         state.loading = false;
-        state.arts = action.payload;
+        state.currentArt = action.payload;
         state.error = null;
       })
       .addCase(getArtsByName.rejected, (state, action) => {
@@ -66,6 +67,7 @@ export const artsSlice = createSlice({
 });
 
 export const selectAllarts = (state) => state.arts.arts;
+export const selectCurrentArt = (state) => state.arts.currentArt;
 export const selectArtsloading = (state) => state.arts.loading;
 export const selectArtsError = (state) => state.arts.error;
 

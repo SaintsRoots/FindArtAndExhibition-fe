@@ -30,6 +30,7 @@ const BlogCard = ({
           icon={<FaLongArrowAltRight />}
           styles={`!border-0 hover:bg-white !text-primary`}
           title={`Continue Reading `}
+          path={`/blog/${title}`}
         />
       </div>
       <div className="flex p-4 hover:bg-primary hover:text-secondary cursor-pointer duration-200 hover:scale-105 bg-secondary text-textColor justify-between absolute left-4 top-7 items-start">

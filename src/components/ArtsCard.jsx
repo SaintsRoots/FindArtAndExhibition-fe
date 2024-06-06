@@ -21,7 +21,7 @@ const ArtsCard = ({ name, price, image,  money, click }) => {
       <div className="buttons-container flex h-[80%] pb-3 w-full justify-center transition ease-out duration-200 absolute left-0 items-end">
         <Button
           title={`Quick View`}
-          path={name || click}
+          path={`/${name}`}
           styles={`text-nowrap bg-white text-textColor !rounded-full`}
         />
       </div>

@@ -36,7 +36,7 @@ const Blog = () => {
                     key={index}
                     className=" border-0 border-b-2 p-1 flex hover:text-primary border-slate-400 w-full "
                   >
-                    <Link to="shop" className="w-full">
+                    <Link to="/shop" className="w-full">
                       {item?.name}
                     </Link>
                   </li>
