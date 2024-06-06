@@ -38,6 +38,9 @@ export const validateAuth = (values) => {
   if (!values.name) {
     errors.name = "Username Required";
   }
+  if (!values.role || values.role === "Choose Your Role") {
+    errors.role = "Role Required";
+  }
 
   return errors;
 };
