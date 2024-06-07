@@ -1,9 +1,17 @@
 import Button from "../components/form/Button";
 import { FaCartPlus } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux";
+import { addItemToCart, selectcartloading } from "../features/cart/cartSlice";
 
-const ArtsCard = ({ name, price, image,  money, click }) => {
+const ArtsCard = ({ name, price, image, money, id }) => {
+  const dispatch = useDispatch();
+  const cartloading = useSelector(selectcartloading);
+
+  const handleAddCart = (productId) => {
+    dispatch(addItemToCart({ productId, quantity: 1 }));
+  };
   return (
-    <div className="flex flex-col gap-4 relative group shadow-md hover:scale-105 transition ease-out duration-200 hover:shadow-md" >
+    <div className="flex flex-col gap-4 relative group shadow-md hover:scale-105 transition ease-out duration-200 hover:shadow-md">
       <div className="max-h-[300px] overflow-hidden">
         <img src={image} alt={name} className="aspect-square duration-100 " />
       </div>
@@ -16,7 +24,12 @@ const ArtsCard = ({ name, price, image,  money, click }) => {
             {price} {money}
           </p>
         </div>
-        <Button icon={<FaCartPlus />} styles={`text-nowrap`} />
+        <Button
+          title={cartloading ? `Wait A bit ..` : ``}
+          click={() => handleAddCart(id)}
+          icon={cartloading ? ` ` : <FaCartPlus />}
+          styles={`text-nowrap`}
+        />
       </div>
       <div className="buttons-container flex h-[80%] pb-3 w-full justify-center transition ease-out duration-200 absolute left-0 items-end">
         <Button
