@@ -17,6 +17,7 @@ class cartDataService {
     });
   }
   addTocart(productId, data, token) {
+    console.log("Service addTocart:", productId, data);
     return http.post(`/cart/${productId}/add`, data, {
       headers: {
         Authorization: `Bearer ${token}`,

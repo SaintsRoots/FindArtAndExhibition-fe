@@ -42,6 +42,7 @@ const Graphics3D = () => {
           image={item?.image}
           name={item?.name}
           price={item?.price}
+          id={item?._id}
           money="Frw"
         />
       ));
