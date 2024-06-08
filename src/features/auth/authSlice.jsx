@@ -1,12 +1,19 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import loginService from "../../services/login.service";
 
+
 const initialState = {
-  userData: null,
+  userData: localStorage.getItem("name")
+    ? {
+        profile: localStorage.getItem("profile"),
+        name: localStorage.getItem("email"),
+        isAdmin: localStorage.getItem("isAdmin") === "true",
+      }
+    : null,
   loading: false,
   error: null,
-  isAuthenticated: false,
-  isAdmin: false,
+  isAuthenticated: !!localStorage.getItem("token"),
+  isAdmin: localStorage.getItem("isAdmin") === "true",
 };
 
 export const makeLogin = createAsyncThunk(
@@ -17,6 +24,7 @@ export const makeLogin = createAsyncThunk(
       if (response) {
         localStorage.setItem("profile", response.data.data.profile);
         localStorage.setItem("name", response.data.data.name);
+        localStorage.setItem("email", response.data.data.email);
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("isAdmin", String(response.data.data.isAdmin));
       }
@@ -50,8 +58,6 @@ export const makeSignup = createAsyncThunk(
     }
   }
 );
-
-
 
 export const logout = createAsyncThunk(
   "login/logout",

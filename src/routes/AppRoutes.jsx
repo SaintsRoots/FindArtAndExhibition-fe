@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import HomeLayout from "../layouts/HomeLayout";
 import DashLayout from "../layouts/DashLayout";
 import Home from "../pages/Home";
@@ -16,10 +18,22 @@ import SingleArts from "../components/SingleArts";
 import Artist from "../components/Artist";
 import Shop from "../components/Shop";
 import SingleBlog from "../components/SingleBlog";
+import Cart from "../pages/Cart";
 
 const AppRoutes = () => {
   return (
     <Router>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <Routes>
         <Route path="/" element={<HomeLayout />}>
           <Route index element={<Home />} />
@@ -27,6 +41,7 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<Forgot />} />
           <Route path="/about" element={<About />} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/artist" element={<Artist />} />
           <Route path="/shop" element={<Shop />} />

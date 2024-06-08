@@ -1,15 +1,58 @@
+import { useState } from "react";
 import Button from "../components/form/Button";
 import { FaCartPlus } from "react-icons/fa";
-import { useSelector, useDispatch } from "react-redux";
-import { addItemToCart, selectcartloading } from "../features/cart/cartSlice";
+import { useDispatch } from "react-redux";
+import { addItemToCart } from "../features/cart/cartSlice";
+import { toast } from "react-toastify";
 
 const ArtsCard = ({ name, price, image, money, id }) => {
+  const [localLoading, setLocalLoading] = useState(false);
   const dispatch = useDispatch();
-  const cartloading = useSelector(selectcartloading);
 
-  const handleAddCart = (productId) => {
-    dispatch(addItemToCart({ productId, quantity: 1 }));
+  const handleAddCart = async (productId) => {
+    setLocalLoading(true);
+    const toastId = `toast-${id}`; // Unique toast ID based on product ID
+    try {
+      await dispatch(addItemToCart({ productId, quantity: 1 })).unwrap();
+      notifySuccess(toastId);
+    } catch (error) {
+      notifyError(toastId);
+      console.error("Failed to add item to cart:", error);
+    } finally {
+      setLocalLoading(false);
+    }
   };
+
+  const notifySuccess = (toastId) => {
+    toast.dismiss(toastId); // Dismiss any existing toast with the same ID
+    toast.success("Art Added Well!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      toastId: toastId, // Use the unique toast ID
+    });
+  };
+
+  const notifyError = (toastId) => {
+    toast.dismiss(toastId); // Dismiss any existing toast with the same ID
+    toast.warn("Please First Login", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      toastId: toastId, // Use the unique toast ID
+    });
+  };
+
   return (
     <div className="flex flex-col gap-4 relative group shadow-md hover:scale-105 transition ease-out duration-200 hover:shadow-md">
       <div className="max-h-[300px] overflow-hidden">
@@ -25,9 +68,9 @@ const ArtsCard = ({ name, price, image, money, id }) => {
           </p>
         </div>
         <Button
-          title={cartloading ? `Wait A bit ..` : ``}
+          title={localLoading ? `Wait A bit ..` : ``}
           click={() => handleAddCart(id)}
-          icon={cartloading ? ` ` : <FaCartPlus />}
+          icon={localLoading ? ` ` : <FaCartPlus />}
           styles={`text-nowrap`}
         />
       </div>
