@@ -6,21 +6,27 @@ import {
   selectAllcart,
   selectTotalPrice,
   selectTotalItems,
+  // selectCurrentCart,
   getCart,
-  selectcartloading,
-  selectcartError,
+  removeItemFromCart,
 } from "../features/cart/cartSlice";
 import { useEffect } from "react";
 
 const Cart = () => {
   const dispatch = useDispatch();
   const cart = useSelector(selectAllcart);
+  // const current = useSelector(selectCurrentCart);
   const totalPrice = useSelector(selectTotalPrice);
   const totalItems = useSelector(selectTotalItems);
-  const loading = useSelector(selectcartloading);
-  const error = useSelector(selectcartError);
-  console.log(loading,error)
 
+  const handleRemoveItem = async (productId) => {
+    try {
+      await dispatch(removeItemFromCart({ productId })).unwrap();
+      dispatch(getCart());
+    } catch (error) {
+      console.error("Failed to remove item from cart: ", error);
+    }
+  };
   useEffect(() => {
     dispatch(getCart());
   }, [dispatch]);
@@ -29,8 +35,8 @@ const Cart = () => {
   const email = localStorage.getItem("email");
 
   return (
-    <div className="container mx-auto px-6 md:px-14 min-h-screen pt-14 pb-14 mt-14  flex flex-col gap-12 justify-center">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
+    <div className="container mx-auto px-6 md:px-14 min-h-screen pt-14 pb-14 mt-14 flex flex-col gap-12 justify-center">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
           <div>
             <h1 className="text-2xl font-semibold">Summary Order</h1>
@@ -46,7 +52,9 @@ const Cart = () => {
                 price={cartItem?.price}
                 quantity={cartItem?.quantity}
                 image={cartItem?.product?.image}
+                productId={cartItem?.product?._id}
                 key={index}
+                onRemove={handleRemoveItem}
               />
             ))}
           </div>
@@ -93,7 +101,7 @@ const Cart = () => {
               <p className="text-sm text-slate-600">{totalPrice} frw</p>
             </div>
           </div>
-            <Button title={`Pay ${totalPrice} frw`} />
+          <Button title={`Pay ${totalPrice} frw`} />
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import Button from "../components/form/Button";
 import { FaCartPlus } from "react-icons/fa";
 import { useDispatch } from "react-redux";
-import { addItemToCart } from "../features/cart/cartSlice";
+import { addItemToCart , getCart } from "../features/cart/cartSlice";
 import { toast } from "react-toastify";
 
 const ArtsCard = ({ name, price, image, money, id }) => {
@@ -14,6 +14,7 @@ const ArtsCard = ({ name, price, image, money, id }) => {
     const toastId = `toast-${id}`; // Unique toast ID based on product ID
     try {
       await dispatch(addItemToCart({ productId, quantity: 1 })).unwrap();
+      dispatch(getCart());
       notifySuccess(toastId);
     } catch (error) {
       notifyError(toastId);
@@ -25,7 +26,7 @@ const ArtsCard = ({ name, price, image, money, id }) => {
 
   const notifySuccess = (toastId) => {
     toast.dismiss(toastId); // Dismiss any existing toast with the same ID
-    toast.success("Art Added Well!", {
+    toast.success("Item Added Well!", {
       position: "top-right",
       autoClose: 5000,
       hideProgressBar: false,

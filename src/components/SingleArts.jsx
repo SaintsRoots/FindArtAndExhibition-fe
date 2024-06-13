@@ -4,6 +4,10 @@ import ArtsCard from "./ArtsCard";
 import Skeleton from "../components/skeleton/arts.skeleton";
 import Skeletn from "./skeleton/single.skeleton";
 import NoData from "./NoData";
+import {
+  notifySuccess,
+  notifyError,
+} from "../components/notifications/notification";
 import { useSelector, useDispatch } from "react-redux";
 import {
   getAllArts,
@@ -13,17 +17,32 @@ import {
   getArtsByName,
   selectCurrentArt,
 } from "../features/arts/artsSlice";
-import { useEffect } from "react";
+
+import { addItemToCart } from "../features/cart/cartSlice";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 const SingleArts = () => {
   const dispatch = useDispatch();
   const { name } = useParams();
+  const [localLoading, setLocalLoading] = useState(false);
 
   const single = useSelector(selectCurrentArt);
   const arts = useSelector(selectAllarts);
   const artsLoading = useSelector(selectArtsloading);
   const artsError = useSelector(selectArtsError);
+
+  const handleAddItemToCart = async (productId) => {
+    setLocalLoading(true);
+    try {
+      await dispatch(addItemToCart({ productId, quantity: 1 }));
+      notifySuccess("Item Added Well!");
+    } catch (error) {
+      notifyError(error.message);
+    } finally {
+      setLocalLoading(false);
+    }
+  };
 
   useEffect(() => {
     dispatch(getAllArts());
@@ -78,7 +97,9 @@ const SingleArts = () => {
               </div>
               <div className="flex flex-col">
                 <p className="text-xs">{single?.owner?.email}</p>
-                <small className="text-sm">+25{single?.owner?.phone}</small>
+                <small className="text-sm">
+                  +25{single?.owner?.phone || "0 729 800 742"}
+                </small>
               </div>
             </div>
             <div className="flex flex-col gap-1">
@@ -98,7 +119,11 @@ const SingleArts = () => {
               <p>{single?.description}</p>
               <h1 className="text-xl font-semibold  ">{single?.price} frw</h1>
             </div>
-            <Button title={`Add to Cart`} icon={<FaCartPlus />} />
+            <Button
+              click={() => handleAddItemToCart(single?._id)}
+              title={localLoading ? `Wait a bit ..` : `Add to Cart`}
+              icon={<FaCartPlus />}
+            />
           </div>
         </div>
       </>
@@ -128,6 +153,7 @@ const SingleArts = () => {
           name={item?.name}
           price={item?.price}
           money="Frw"
+          id={item?._id}
         />
       ));
   }
