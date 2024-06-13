@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, {useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoClose } from "react-icons/io5";
 import Button from "../components/form/Button";
@@ -7,19 +7,14 @@ import { navLink } from "./JsonData/NavBar";
 import { useSelector, useDispatch } from "react-redux";
 import { getIsAuthenticated, logout } from "../features/auth/authSlice";
 import { FaCartPlus } from "react-icons/fa";
-import { selectAllcart } from "../features/cart/cartSlice";
+import { selectAllcart} from "../features/cart/cartSlice";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const isAuthenticated = useSelector(getIsAuthenticated);
   const allCart = useSelector(selectAllcart);
-  const [cartLength, setCartLength] = useState(allCart?.length || 0);
+
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    setCartLength(allCart?.length || 0);
-  }, [allCart]);
-
   const handleClick = () => {
     setIsOpen(!isOpen);
   };
@@ -65,14 +60,16 @@ const NavBar = () => {
             </ul>
           )}
           {isAuthenticated ? (
-            <div className="flex w-full  items-center gap-3 ">
-              <div className="flex relative ">
+            <div className="flex w-full items-center gap-3">
+              <div className="flex relative">
                 <Link to="/cart">
-                  <FaCartPlus className="text-primary text-2xl " />
+                  <FaCartPlus className="text-primary text-2xl" />
                 </Link>
-                <div className="absolute -top-5 rounded-md w-full flex items-center justify-center  p-1 bg-primary text-secondary -right-3  gap-1">
-                  <p className="text-secondary text-xs">{cartLength}</p>
-                </div>
+                {allCart?.length > 0 && (
+                  <div className="absolute -top-5 rounded-md w-full flex items-center justify-center p-1 bg-primary text-secondary -right-3 gap-1">
+                    <p className="text-secondary text-xs">{allCart?.length}</p>
+                  </div>
+                )}
               </div>
               <Button title="Logout" click={handleLogout} />
             </div>

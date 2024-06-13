@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import loginService from "../../services/login.service";
 
-
 const initialState = {
   userData: localStorage.getItem("name")
     ? {
@@ -31,7 +30,7 @@ export const makeLogin = createAsyncThunk(
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Invalid Username or Password"
+        error.response?.data?.error || "Invalid Username or Password"
       );
     }
   }
@@ -39,11 +38,12 @@ export const makeLogin = createAsyncThunk(
 // Signup
 export const makeSignup = createAsyncThunk(
   "login/signup",
-  async ({ name, email, password, profile }, { rejectWithValue }) => {
+  async ({ name, email, password, profile, role }, { rejectWithValue }) => {
     const formData = new FormData();
     formData.append("name", name);
     formData.append("email", email);
     formData.append("password", password);
+    formData.append("role", role);
     if (profile) {
       formData.append("profile", profile);
     }
@@ -52,9 +52,7 @@ export const makeSignup = createAsyncThunk(
       const response = await loginService.signup(formData);
       return response.data?.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || "Check your Internet connection"
-      );
+      return rejectWithValue(error.response?.data?.error);
     }
   }
 );

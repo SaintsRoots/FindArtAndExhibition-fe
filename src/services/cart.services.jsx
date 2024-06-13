@@ -17,7 +17,6 @@ class cartDataService {
     });
   }
   addTocart(productId, data, token) {
-    console.log("Service addTocart:", productId, data);
     return http.post(`/cart/${productId}/add`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -35,6 +34,14 @@ class cartDataService {
 
   deleteCart(id, token) {
     return http.delete(`/cart/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+  // 
+  removeFromCart(productId, token) {
+    return http.delete(`/cart/${productId}/remove`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
