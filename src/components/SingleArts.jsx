@@ -21,6 +21,7 @@ import {
 import { addItemToCart } from "../features/cart/cartSlice";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import Spinner from "./Spinner";
 
 const SingleArts = () => {
   const dispatch = useDispatch();
@@ -121,8 +122,10 @@ const SingleArts = () => {
             </div>
             <Button
               click={() => handleAddItemToCart(single?._id)}
-              title={localLoading ? `Wait a bit ..` : `Add to Cart`}
-              icon={<FaCartPlus />}
+              title={
+                localLoading ? <Spinner classes={`!h-6 !w-6`} /> : `Add to Cart`
+              }
+              icon={localLoading ? `` : <FaCartPlus />}
             />
           </div>
         </div>

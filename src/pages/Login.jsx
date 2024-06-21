@@ -5,7 +5,6 @@ import Button from "../components/form/Button";
 import { FaUser, FaLock } from "react-icons/fa";
 import { useFormik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
   selectLoginStatus,
@@ -13,9 +12,11 @@ import {
   getIsAuthenticated,
   makeLogin,
   getIsAdmin,
+  getIsArtist,
 } from "../features/auth/authSlice";
 import * as forValidation from "../validations/Index";
-
+import Spinner from "../components/Spinner";
+import { notifySuccess } from "../components/notifications/notification";
 function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -23,6 +24,7 @@ function Login() {
   const loginError = useSelector(selectLoginError);
   const isAuthenticated = useSelector(getIsAuthenticated);
   const isAdmin = useSelector(getIsAdmin);
+  const isArtist = useSelector(getIsArtist);
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -36,33 +38,21 @@ function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      if (isAdmin) {
-        notify();
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 3000);
-      } else {
-        notify();
-        // set timeout
-        setTimeout(() => {
+      notifySuccess("Login successful");
+      setTimeout(() => {
+        if (isAdmin) {
+          navigate("/dashboard/admin");
+        } else if (isArtist) {
+          navigate("/dashboard/artist");
+        } else {
           navigate("/");
-        }, 3000);
-      }
+        }
+      }, 3000);
     }
-  }, [isAuthenticated, isAdmin, navigate]);
+  }, [isAuthenticated, isAdmin, isArtist, navigate]);
 
-  const notify = () => {
-    toast.success("Login Succesfully!", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-    });
-  };
+
+
   return (
     <div className="bg-secondary w-full min-h-screen mt-8 flex justify-center items-center">
       <div className="w-full flex flex-col justify-center items-center">
@@ -114,7 +104,13 @@ function Login() {
             </div>
             <Button
               click={() => formik.submitForm()}
-              title={loading ? "Logging in..." : "Login"}
+              title={
+                loading ? (
+                  <Spinner classes={` !text-white !h-6 !w-6`} />
+                ) : (
+                  "Login"
+                )
+              }
               styles={`w-full !scale-100 mt-6 mdl:mt-12 bg-primary text-white`}
             />
             <div className="mt-6 flex flex-col md:flex-row gap-2 justify-between">

@@ -2,8 +2,9 @@ import { useState } from "react";
 import Button from "../components/form/Button";
 import { FaCartPlus } from "react-icons/fa";
 import { useDispatch } from "react-redux";
-import { addItemToCart , getCart } from "../features/cart/cartSlice";
+import { addItemToCart, getCart } from "../features/cart/cartSlice";
 import { toast } from "react-toastify";
+import Spinner from "./Spinner";
 
 const ArtsCard = ({ name, price, image, money, id }) => {
   const [localLoading, setLocalLoading] = useState(false);
@@ -69,10 +70,16 @@ const ArtsCard = ({ name, price, image, money, id }) => {
           </p>
         </div>
         <Button
-          title={localLoading ? `Wait A bit ..` : ``}
+          title={
+            localLoading ? (
+              <Spinner classes={`!h-4 !w-4 hover:!text-white`} />
+            ) : (
+              ``
+            )
+          }
           click={() => handleAddCart(id)}
           icon={localLoading ? ` ` : <FaCartPlus />}
-          styles={`text-nowrap`}
+          styles={`text-nowrap hover:!text-white `}
         />
       </div>
       <div className="buttons-container flex h-[80%] pb-3 w-full justify-center transition ease-out duration-200 absolute left-0 items-end">

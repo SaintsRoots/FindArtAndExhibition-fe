@@ -7,12 +7,14 @@ const initialState = {
         profile: localStorage.getItem("profile"),
         name: localStorage.getItem("email"),
         isAdmin: localStorage.getItem("isAdmin") === "true",
+        isArtist: localStorage.getItem("role") === "Artist",
       }
     : null,
   loading: false,
   error: null,
   isAuthenticated: !!localStorage.getItem("token"),
   isAdmin: localStorage.getItem("isAdmin") === "true",
+  isArtist: localStorage.getItem("role") === "Artist",
 };
 
 export const makeLogin = createAsyncThunk(
@@ -26,6 +28,7 @@ export const makeLogin = createAsyncThunk(
         localStorage.setItem("email", response.data.data.email);
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("isAdmin", String(response.data.data.isAdmin));
+        localStorage.setItem("role", response.data.data.role);
       }
       return response.data.data;
     } catch (error) {
@@ -35,7 +38,7 @@ export const makeLogin = createAsyncThunk(
     }
   }
 );
-// Signup
+
 export const makeSignup = createAsyncThunk(
   "login/signup",
   async ({ name, email, password, profile, role }, { rejectWithValue }) => {
@@ -63,8 +66,10 @@ export const logout = createAsyncThunk(
     try {
       localStorage.removeItem("profile");
       localStorage.removeItem("name");
+      localStorage.removeItem("email");
       localStorage.removeItem("token");
       localStorage.removeItem("isAdmin");
+      localStorage.removeItem("role");
       return true;
     } catch (error) {
       return rejectWithValue("Failed to logout.");
@@ -85,6 +90,7 @@ export const loginSlice = createSlice({
         state.loading = false;
         state.userData = action.payload;
         state.isAdmin = action.payload.isAdmin;
+        state.isArtist = action.payload.role === "Artist";
         state.error = null;
         state.isAuthenticated = true;
       })
@@ -93,6 +99,7 @@ export const loginSlice = createSlice({
         state.error = action.payload;
         state.isAuthenticated = false;
         state.isAdmin = false;
+        state.isArtist = false;
       })
       .addCase(logout.fulfilled, (state) => {
         state.userData = null;
@@ -100,6 +107,7 @@ export const loginSlice = createSlice({
         state.error = null;
         state.isAuthenticated = false;
         state.isAdmin = false;
+        state.isArtist = false;
       })
       .addCase(makeSignup.pending, (state) => {
         state.loading = true;
@@ -107,6 +115,8 @@ export const loginSlice = createSlice({
       })
       .addCase(makeSignup.fulfilled, (state, action) => {
         state.userData = action.payload;
+        state.isAdmin = action.payload.isAdmin;
+        state.isArtist = action.payload.role === "Artist";
         state.loading = false;
       })
       .addCase(makeSignup.rejected, (state, action) => {
@@ -121,5 +131,7 @@ export const selectLoginStatus = (state) => state.login.loading;
 export const selectLoginError = (state) => state.login.error;
 export const getIsAuthenticated = (state) => state.login.isAuthenticated;
 export const getIsAdmin = (state) => state.login.isAdmin;
+export const getIsArtist = (state) => state.login.isArtist;
+
 
 export default loginSlice.reducer;

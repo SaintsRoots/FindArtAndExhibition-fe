@@ -19,6 +19,8 @@ import Artist from "../components/Artist";
 import Shop from "../components/Shop";
 import SingleBlog from "../components/SingleBlog";
 import Cart from "../pages/Cart";
+import Admin from "../components/admin/Admin";
+import Artistlayout from "../layouts/Artistlayout";
 
 const AppRoutes = () => {
   return (
@@ -50,11 +52,24 @@ const AppRoutes = () => {
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<NotFound />} />
         </Route>
+
         <Route
-          path="/dashboard"
+          path="/dashboard/admin"
           element={
             <ProtectedRoute>
               <DashLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Admin />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+
+        <Route
+          path="/dashboard/artist"
+          element={
+            <ProtectedRoute>
+              <Artistlayout />
             </ProtectedRoute>
           }
         >
