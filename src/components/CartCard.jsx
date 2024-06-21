@@ -7,6 +7,7 @@ import {
   notifySuccess,
   notifyError,
 } from "../components/notifications/notification";
+import Spinner from "./Spinner";
 
 const CartCard = ({ quantity, name, price, image, productId, onRemove }) => {
   const [loading, setLoading] = useState(false);
@@ -43,10 +44,18 @@ const CartCard = ({ quantity, name, price, image, productId, onRemove }) => {
       </div>
       <div className="flex flex-col items-end justify-between">
         <p
-          className="flex items-center justify-center hover:bg-primary cursor-pointer rounded-md hover:text-secondary p-1"
+          className={
+            loading
+              ? `flex items-center justify-center bg-primary cursor-pointer rounded-md text-secondary p-1`
+              : `flex items-center justify-center hover:bg-primary cursor-pointer rounded-md hover:text-secondary p-1`
+          }
           onClick={handleRemove}
         >
-          {loading ? "Loading..." : <IoClose className="text-xl font-bold" />}
+          {loading ? (
+            <Spinner classes={` !text-white !h-4 !w-4`} />
+          ) : (
+            <IoClose className="text-xl font-bold" />
+          )}
         </p>
         <div className="flex justify-center gap-1 items-center">
           <p className="flex items-center justify-center bg-slate-300 hover:bg-primary cursor-pointer rounded-md hover:text-secondary p-1">

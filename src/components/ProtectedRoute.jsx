@@ -1,17 +1,22 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { getIsAuthenticated, getIsAdmin } from "../features/auth/authSlice";
+import { getIsAuthenticated, getIsAdmin, getIsArtist } from "../features/auth/authSlice";
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, role }) => {
   const isAuthenticated = useSelector(getIsAuthenticated);
   const isAdmin = useSelector(getIsAdmin);
+  const isArtist = useSelector(getIsArtist);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
 
-  if (!isAdmin) {
+  if (role === 'Admin' && !isAdmin) {
+    return <Navigate to="/" />;
+  }
+
+  if (role === 'Artist' && !isArtist) {
     return <Navigate to="/" />;
   }
 

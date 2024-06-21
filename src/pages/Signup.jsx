@@ -13,6 +13,7 @@ import Input from "../components/form/Input";
 import Button from "../components/form/Button";
 import { FaUser, FaLock, FaEnvelope } from "react-icons/fa";
 import * as forValidation from "../validations/Index";
+import Spinner from "../components/Spinner";
 
 function Signup() {
   const navigate = useNavigate();
@@ -171,7 +172,7 @@ function Signup() {
             </div>
             <Button
               click={formik.submitForm}
-              title={loading ? "Processing..." : "Signup"}
+              title={loading ? <Spinner classes={` !text-white !h-6 !w-6`} /> : "Signup"}
               styles="w-full !scale-100 mt-6 mdl:mt-12 bg-primary text-white"
             />
             <div className="mt-6 flex flex-col md:flex-row gap-2 justify-between">
