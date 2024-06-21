@@ -1,10 +1,10 @@
-import { Outlet } from "react-router-dom";
+import React from 'react';
+import { adminNav } from '../components/JsonData/adminNav';
+import Layout from '../layouts/Layout';
 
 const DashLayout = () => {
   return (
-    <div>
-      <Outlet />
-    </div>
+    <Layout navItems={adminNav} topNavProps={{ isAdmin: true }} />
   );
 };
 

@@ -1,9 +1,11 @@
-import { Outlet } from "react-router-dom";
+import React from 'react';
+import { artistNav } from '../components/JsonData/artistNav';
+import Layout from '../layouts/Layout';
 
-const Artistlayout = () => {
+const ArtistLayout = () => {
   return (
-    <div><Outlet /></div>
-  )
-}
+    <Layout navItems={artistNav} topNavProps={{ isAdmin: false }} />
+  );
+};
 
-export default Artistlayout
+export default ArtistLayout;
