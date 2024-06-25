@@ -17,37 +17,37 @@ export const artistNav = [
   },
   {
     name: "Manage Artworks",
-    path: "/manage-artworks",
+    path: "manage-artworks",
     icon: <FaPaintBrush />,
   },
   {
     name: "Orders",
-    path: "/orders",
+    path: "orders",
     icon: <FaShoppingCart />,
   },
   {
     name: "Sales Reports",
-    path: "/sales-reports",
+    path: "sales-reports",
     icon: <FaChartLine />,
   },
   {
     name: "Profile",
-    path: "/profile",
+    path: "profile",
     icon: <FaUser />,
   },
   {
     name: "Messages",
-    path: "/messages",
+    path: "messages",
     icon: <FaEnvelope />,
   },
   {
     name: "Settings",
-    path: "/settings",
+    path: "settings",
     icon: <FaCog />,
   },
   {
     name: "Logout",
-    path: "/Logout",
+    path: "Logout",
     icon: <RiLogoutCircleRLine />,
   },
 ];
