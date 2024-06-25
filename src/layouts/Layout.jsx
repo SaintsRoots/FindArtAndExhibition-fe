@@ -15,7 +15,7 @@ const Layout = ({ navItems, topNavProps }) => {
                   to={link.path}
                   className={({ isActive }) =>
                     isActive
-                      ? "text-base font-semibold leading-7 text-primary flex gap-3 items-center"
+                      ? "text-sm font-semibold leading-7 text-primary flex gap-3 items-center"
                       : "text-xs font-medium leading-7 text-black hover:text-primary flex gap-3 items-center"
                   }
                 >
