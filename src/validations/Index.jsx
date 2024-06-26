@@ -79,27 +79,25 @@ export const validateContactForm = (values) => {
   return errors;
 };
 
-// validating Events Form
-export const validateEventForm = (values) => {
+// validating Artss Form
+export const validateArtsForm = (values) => {
   let errors = {};
 
-  if (!values.title) {
-    errors.title = "Event title Required";
+  if (!values.name) {
+    errors.name = "Arts Name Required";
   }
-  if (!values.location) {
-    errors.location = "Location Required";
+  if (!values.category) {
+    errors.category = "Arts category Required";
   }
-  if (!values.date_schedule) {
-    errors.date_schedule = "Date Required";
-  }
-  if (!values.available_tickets) {
-    errors.available_tickets = "Available Tickets Required";
+
+  if (!values.available_arts) {
+    errors.available_arts = "Available Arts Required";
   }
   if (!values.price) {
     errors.price = "Price Required";
   }
-  if (!values.time) {
-    errors.time = "Time Required";
+  if (!values.image) {
+    errors.image = "Image Required";
   }
   if (!values.description) {
     errors.description = "Description Required";

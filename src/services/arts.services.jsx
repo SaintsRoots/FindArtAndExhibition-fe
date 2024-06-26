@@ -4,6 +4,9 @@ class artsDataService {
   getAll() {
     return http.get("/arts");
   }
+  getAlllogged() {
+    return http.get("/arts/owner");
+  }
   getByName(name) {
     return http.get(`/arts/name/${name}`);
   }
