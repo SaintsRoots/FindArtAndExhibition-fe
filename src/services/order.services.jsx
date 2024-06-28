@@ -7,17 +7,19 @@ class checkoutDataService {
   getAllByOwner() {
     return http.get("/checkout/owner");
   }
+  getAllCustomer() {
+    return http.get("/checkout/customer");
+  }
+  getordersByArtist() {
+    return http.get("/checkout/artsOwner");
+  }
 
   get(orderId) {
     return http.get(`/checkout/${orderId}`);
   }
 
-  create(cartId, data, token) {
-    return http.post(`/checkout/${cartId}`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  create(cartId, data) {
+    return http.post(`/checkout/${cartId}`, data);
   }
 }
 
