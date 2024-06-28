@@ -6,6 +6,7 @@ const initialState = {
   loading: false,
   currentArt: null,
   error: null,
+  totalPrice: 0,
 };
 
 // get all arts
@@ -134,6 +135,10 @@ export const artsSlice = createSlice({
       .addCase(getAllArtsByOwner.fulfilled, (state, action) => {
         state.loading = false;
         state.arts = action.payload;
+        state.totalPrice = action.payload.reduce(
+          (sum, art) => sum + art.price,
+          0
+        );
         state.error = null;
       })
       .addCase(getAllArtsByOwner.rejected, (state, action) => {
@@ -205,6 +210,7 @@ export const artsSlice = createSlice({
 
 export const selectAllarts = (state) => state.arts.arts;
 export const selectCurrentArt = (state) => state.arts.currentArt;
+export const selectTotalPrice = (state) => state.arts.totalPrice;
 export const selectArtsloading = (state) => state.arts.loading;
 export const selectArtsError = (state) => state.arts.error;
 
