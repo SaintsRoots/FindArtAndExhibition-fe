@@ -15,6 +15,7 @@ const initialState = {
   isAuthenticated: !!localStorage.getItem("token"),
   isAdmin: localStorage.getItem("isAdmin") === "true",
   isArtist: localStorage.getItem("role") === "Artist",
+  users: [],
 };
 
 export const makeLogin = createAsyncThunk(
@@ -23,6 +24,7 @@ export const makeLogin = createAsyncThunk(
     try {
       const response = await loginService.login({ email, password });
       if (response) {
+        localStorage.setItem("identity", response.data.data._id);
         localStorage.setItem("profile", response.data.data.profile);
         localStorage.setItem("name", response.data.data.name);
         localStorage.setItem("email", response.data.data.email);
@@ -41,14 +43,14 @@ export const makeLogin = createAsyncThunk(
 
 export const makeSignup = createAsyncThunk(
   "login/signup",
-  async ({ name, email, password, profile, role }, { rejectWithValue }) => {
+  async ({ name, email, password, img, role }, { rejectWithValue }) => {
     const formData = new FormData();
     formData.append("name", name);
     formData.append("email", email);
     formData.append("password", password);
     formData.append("role", role);
-    if (profile) {
-      formData.append("profile", profile);
+    if (img) {
+      formData.append("img", img);
     }
 
     try {
@@ -60,6 +62,60 @@ export const makeSignup = createAsyncThunk(
   }
 );
 
+// make Update
+
+export const makeUpdate = createAsyncThunk(
+  "login/update",
+  async (
+    {
+      id,
+      name,
+      email,
+      password,
+      img,
+      phone,
+      province,
+      district,
+      sector,
+      street,
+    },
+    { rejectWithValue }
+  ) => {
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("phone", phone);
+    formData.append("province", province);
+    formData.append("district", district);
+    formData.append("sector", sector);
+    formData.append("street", street);
+    if (img) {
+      formData.append("img", img);
+    }
+
+    try {
+      const response = await loginService.update(id, formData);
+      return response.data?.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error);
+    }
+  }
+);
+
+// get Single user
+
+export const makeGetSingleUser = createAsyncThunk(
+  "login/getSingleUser",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await loginService.getSingle(id);
+      return response.data?.data;
+    } catch (error) {
+      return rejectWithValue("Failed to get user.");
+    }
+  }
+);
 export const logout = createAsyncThunk(
   "login/logout",
   async (_, { rejectWithValue }) => {
@@ -122,16 +178,43 @@ export const loginSlice = createSlice({
       .addCase(makeSignup.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // make update
+      .addCase(makeUpdate.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(makeUpdate.fulfilled, (state, action) => {
+        state.users = action.payload;
+        state.loading = false;
+      })
+      .addCase(makeUpdate.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // make update
+      .addCase(makeGetSingleUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(makeGetSingleUser.fulfilled, (state, action) => {
+        state.users = action.payload;
+        state.loading = false;
+      })
+      .addCase(makeGetSingleUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
 // Selectors
 export const selectLoginStatus = (state) => state.login.loading;
+export const selectSingleUser = (state) => state.login.users;
 export const selectLoginError = (state) => state.login.error;
 export const getIsAuthenticated = (state) => state.login.isAuthenticated;
 export const getIsAdmin = (state) => state.login.isAdmin;
 export const getIsArtist = (state) => state.login.isArtist;
-
 
 export default loginSlice.reducer;

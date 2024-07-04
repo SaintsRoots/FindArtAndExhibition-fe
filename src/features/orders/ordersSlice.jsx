@@ -54,6 +54,7 @@ const orderSlice = createSlice({
       .addCase(getOrders.fulfilled, (state, action) => {
         state.loading = false;
         state.ordersItems = action.payload[0]?.items || [];
+        state.orders = action.payload;
         state.totalRevenue = calculateTotalRevenue(action.payload);
         state.error = null;
       })
@@ -79,7 +80,7 @@ const orderSlice = createSlice({
 });
 
 // Selectors
-export const selectOrders = (state) => state.orders.ordersItems;
+export const selectOrders = (state) => state.orders.orders;
 export const selectCustomers = (state) => state.orders.customers;
 export const selectOrdersLoading = (state) => state.orders.loading;
 export const selectOrdersError = (state) => state.orders.error;
