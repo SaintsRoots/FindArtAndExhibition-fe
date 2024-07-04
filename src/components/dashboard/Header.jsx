@@ -7,7 +7,6 @@ import {
   getOrders,
   getOrdersCustomer,
   selectOrdersLoading,
-  selectOrdersError,
   selectOrders,
   selectCustomers,
   selectTotalRevenue,
