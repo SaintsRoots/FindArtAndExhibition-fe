@@ -22,6 +22,9 @@ import Cart from "../pages/Cart";
 import Admin from "../components/admin/Admin";
 import Artistlayout from "../layouts/Artistlayout";
 import ManageArt from "../components/dashboard/ManageArt";
+import Oders from "../components/dashboard/Oders";
+import Profile from "../components/dashboard/Profile";
+
 
 const AppRoutes = () => {
   return (
@@ -76,6 +79,8 @@ const AppRoutes = () => {
         >
           <Route index element={<Dashboard />} />
           <Route path="manage-artworks" element={<ManageArt />} />
+          <Route path="orders" element={<Oders />} />
+          <Route path="profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

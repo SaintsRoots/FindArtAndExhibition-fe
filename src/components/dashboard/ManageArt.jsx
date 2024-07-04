@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import Modal from "./ArtsModol";
 import Skeleton from "../skeleton/arts.skeleton";
-import NoData from "../NoData";
+
 
 const ManageArt = () => {
   const dispatch = useDispatch();
@@ -47,13 +47,7 @@ const ManageArt = () => {
     content = Array.from({ length: 6 }, (_, index) => <Skeleton key={index} />);
   }
   if (arts.length === 0) {
-    return (
-      <div className="min-h-screen flex flex-col gap-4  justify-center">
-        <div className="w-full">
-          <NoData />
-        </div>
-      </div>
-    );
+    content = <p>No Data Found</p>;
   }
   if (arts.length > 0) {
     content = arts.map((item, index) => (

@@ -44,6 +44,39 @@ export const validateAuth = (values) => {
 
   return errors;
 };
+export const validateUpdate = (values) => {
+  let errors = {};
+  if (!values.email) {
+    errors.email = "Email Required";
+  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+    errors.email = "Invalid email address";
+  }
+
+  if (!values.password) {
+    errors.password = "Password Required";
+  }
+
+  if (!values.name) {
+    errors.name = "Username Required";
+  }
+  if (!values.phone) {
+    errors.phone = "Phone Required";
+  }
+  if (!values.street) {
+    errors.street = "Street Required";
+  }
+  if (!values.province) {
+    errors.province = "Province Required";
+  }
+  if (!values.sector) {
+    errors.sector = "Sector Required";
+  }
+  if (!values.district) {
+    errors.district = "District Required";
+  }
+
+  return errors;
+};
 
 export const validateForgotPassword = (values) => {
   let errors = {};

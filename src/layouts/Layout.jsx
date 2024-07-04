@@ -1,8 +1,19 @@
 import React from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import TopNav from "../components/TopNav";
+import { useDispatch } from "react-redux";
+import { logout } from "../features/auth/authSlice";
 
 const Layout = ({ navItems, topNavProps }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // handle logout
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login"); 
+  };
+
   return (
     <div>
       <TopNav {...topNavProps} />
@@ -18,6 +29,11 @@ const Layout = ({ navItems, topNavProps }) => {
                       ? "text-sm font-semibold leading-7 text-primary flex gap-3 items-center"
                       : "text-xs font-medium leading-7 text-black hover:text-primary flex gap-3 items-center"
                   }
+                  onClick={() => {
+                    if (link.path === "Logout") {
+                      handleLogout();
+                    };
+                  }}
                 >
                   <div className="text-primary">{link.icon}</div>
                   <span className="text-nowrap">{link.name}</span>

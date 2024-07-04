@@ -3,14 +3,28 @@ import { FaCartPlus } from "react-icons/fa";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { FiSearch } from "react-icons/fi";
 import { MdNotificationsActive } from "react-icons/md";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
-import { adminNav } from './JsonData/adminNav';
-import { artistNav } from './JsonData/artistNav';
+import { adminNav } from "./JsonData/adminNav";
+import { artistNav } from "./JsonData/artistNav";
 import IPICA from "../assets/bg-1.jpg";
+import { useDispatch } from "react-redux";
+import { logout } from "../features/auth/authSlice";
 const TopNav = ({ isAdmin }) => {
   const [isOpeni, setIsOpeni] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const ifoto = localStorage.getItem("profile");
+
+  // handle logout
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
@@ -39,7 +53,12 @@ const TopNav = ({ isAdmin }) => {
                   <li key={index} className="hover:bg-slate-100 px-2 py-2">
                     <NavLink
                       to={link.path}
-                      onClick={() => setIsOpeni(false)}
+                      onClick={() => {
+                        setIsOpeni(false);
+                        if (link.path === "Logout") {
+                          handleLogout();
+                        }
+                      }}
                       className={(navClass) =>
                         navClass.isActive
                           ? " text-base font-semibold leading-7 text-primary flex gap-3 items-center "
@@ -111,8 +130,12 @@ const TopNav = ({ isAdmin }) => {
             )}
           </div>
 
-          <Link to="/Settings">
-            <img src={IPICA} alt="" className=" h-9 w-9 rounded-full " />
+          <Link to="/dashboard/artist/profile">
+            <img
+              src={ifoto || IPICA}
+              alt=""
+              className=" h-9 w-9 rounded-full "
+            />
           </Link>
         </div>
       </div>
