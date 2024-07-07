@@ -25,6 +25,7 @@ function Login() {
   const isAuthenticated = useSelector(getIsAuthenticated);
   const isAdmin = useSelector(getIsAdmin);
   const isArtist = useSelector(getIsArtist);
+  
   const formik = useFormik({
     initialValues: {
       email: "",

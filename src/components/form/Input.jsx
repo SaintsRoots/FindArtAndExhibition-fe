@@ -27,7 +27,7 @@ const Input = ({
             id={id}
             onChange={onChange}
             placeholder={placeholder}
-            className="w-full h-full bg-transparent py-3 outline-none"
+            className="w-full h-full bg-transparent py-3 text-xs outline-none"
           />
         </div>
       ) : (
@@ -40,7 +40,7 @@ const Input = ({
           placeholder={placeholder}
           onChange={onChange}
           value={values}
-          className="text-xs md:text-sm duration-150 w-full outline-none border-b rounded-xl border-2 group-hover:border-primary px-6 py-3"
+          className="text-xs md:text-xs duration-150 w-full outline-none border-b rounded-xl border-2 group-hover:border-primary px-6 py-3"
         >
           {values}
         </textarea>
