@@ -9,6 +9,7 @@ import {
   getCart,
   removeItemFromCart,
   selectCartId,
+  
 } from "../features/cart/cartSlice";
 import { useEffect, useState } from "react";
 import { useFormik } from "formik";
@@ -20,7 +21,7 @@ import {
 } from "../components/notifications/notification";
 import Spinner from "../components/Spinner";
 
-import CartImage from "../assets/cart.jpg"
+import CartImage from "../assets/cart.jpg";
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -101,12 +102,19 @@ const Cart = () => {
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-
-            <p>No Carts Items Available Just Go To <a href="/shop" className="text-primary font-bold ">Shop</a> and Add yours</p>
-            <image src={CartImage} alt={`Cart Image`} className=" object-cover " />
+              <p>
+                No Carts Items Available Just Go To{" "}
+                <a href="/shop" className="text-primary font-bold ">
+                  Shop
+                </a>{" "}
+                and Add yours
+              </p>
+              <image
+                src={CartImage}
+                alt={`Cart Image`}
+                className=" object-cover "
+              />
             </div>
-
-
           )}
         </div>
         {cart && cart.length > 0 ? (
