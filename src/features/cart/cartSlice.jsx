@@ -28,6 +28,23 @@ export const addItemToCart = createAsyncThunk(
     }
   }
 );
+export const updateCart = createAsyncThunk(
+  "cart/updateCart",
+  async ({ productId, quantity }, { rejectWithValue }) => {
+    try {
+      const data = { quantity };
+      const response = await cartService.updateCart(productId, data);
+      return response.data.data;
+    } catch (error) {
+      if (error.response.status === 400) {
+        return rejectWithValue(error.response.data.message);
+      }
+      return rejectWithValue(
+        error.response?.data?.error || "Check your Internet connection"
+      );
+    }
+  }
+);
 
 // get cart
 export const getCart = createAsyncThunk(
@@ -80,6 +97,19 @@ const cartSlice = createSlice({
         state.error = null;
       })
       .addCase(addItemToCart.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updateCart.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateCart.fulfilled, (state, action) => {
+        state.loading = false;
+        state.cart = [...state.cart, action.payload];
+        state.error = null;
+      })
+      .addCase(updateCart.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
