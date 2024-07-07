@@ -138,3 +138,18 @@ export const validateArtsForm = (values) => {
 
   return errors;
 };
+
+// validate cheout
+
+export const validateCheckout = (values) => {
+  let errors = {};
+
+  if (!values.paymentMethod || values.paymentMethod === "Choose Payment Type") {
+    errors.paymentMethod = "Payment Method Required";
+  }
+  if (!values.shippingAddress) {
+    errors.shippingAddress = "Shipping Address Required";
+  }
+
+  return errors;
+};

@@ -6,6 +6,7 @@ const initialState = {
   loading: false,
   totalItems: 0,
   totalPrice: 0,
+  cartId:null,
   error: null,
 };
 
@@ -35,6 +36,7 @@ export const getCart = createAsyncThunk(
     try {
       const response = await cartService.getAllCart();
       return {
+        cartId: response.data._id,
         items: response.data.items,
         totalPrice: response.data.totalPrice,
         totalItems: response.data.totalItems,
@@ -89,6 +91,7 @@ const cartSlice = createSlice({
       })
       .addCase(getCart.fulfilled, (state, action) => {
         state.loading = false;
+        state.cartId = action.payload.cartId;
         state.cart = action.payload.items;
         state.totalPrice = action.payload.totalPrice;
         state.totalItems = action.payload.totalItems;
@@ -121,6 +124,7 @@ const cartSlice = createSlice({
 export const selectAllcart = (state) => state.cart.cart;
 export const selectTotalPrice = (state) => state.cart.totalPrice;
 export const selectTotalItems = (state) => state.cart.totalItems;
+export const selectCartId = (state) => state.cart.cartId;
 export const selectcartloading = (state) => state.cart.loading;
 export const selectcartError = (state) => state.cart.error;
 
