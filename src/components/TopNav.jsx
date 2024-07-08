@@ -130,7 +130,7 @@ const TopNav = ({ isAdmin }) => {
             )}
           </div>
 
-          <Link to="/dashboard/artist/profile">
+          <Link to="#">
             <img
               src={ifoto || IPICA}
               alt=""

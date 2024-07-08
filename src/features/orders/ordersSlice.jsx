@@ -23,6 +23,17 @@ export const getOrders = createAsyncThunk(
     }
   }
 );
+export const getAllOrders = createAsyncThunk(
+  "orders/getAll",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await ordersService.getAll();
+      return response.data?.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
 
 export const getOrdersCustomer = createAsyncThunk(
   "orders/getOrdersCustomer",
@@ -75,6 +86,22 @@ const orderSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      // all orders
+      .addCase(getAllOrders.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllOrders.fulfilled, (state, action) => {
+        state.loading = false;
+        state.ordersItems = action.payload[0]?.items || [];
+        state.orders = action.payload;
+        state.totalRevenue = calculateTotalRevenue(action.payload);
+        state.error = null;
+      })
+      .addCase(getAllOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       // By customer
       .addCase(getOrdersCustomer.pending, (state) => {
         state.loading = true;
@@ -102,7 +129,7 @@ const orderSlice = createSlice({
       .addCase(makeOrders.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      })
+      });
   },
 });
 

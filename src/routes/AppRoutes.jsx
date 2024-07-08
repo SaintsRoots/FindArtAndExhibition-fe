@@ -24,6 +24,12 @@ import Artistlayout from "../layouts/Artistlayout";
 import ManageArt from "../components/dashboard/ManageArt";
 import Oders from "../components/dashboard/Oders";
 import Profile from "../components/dashboard/Profile";
+import Settings from "../components/admin/Settings";
+import Orders from "../components/admin/Orders";
+import ManageArts from "../components/admin/ManageArts";
+import ManageArtist from "../components/admin/ManageArtist";
+import ManageCustomer from "../components/admin/ManageCustomer";
+
 
 
 const AppRoutes = () => {
@@ -67,6 +73,13 @@ const AppRoutes = () => {
         >
           <Route index element={<Admin />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="manage-artworks" element={<ManageArts />} />
+          <Route path="manage-artists" element={<ManageArtist />} />
+          <Route path="manage-customers" element={<ManageCustomer />} />
+
+
         </Route>
 
         <Route

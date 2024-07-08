@@ -17,6 +17,17 @@ export const getAllartist = createAsyncThunk(
   }
 );
 
+// delete artist
+
+export const deleteArtist = createAsyncThunk(
+  "artist/deleteArtist",
+  async (id) => {
+    await artistService.delete(id);
+    const response = await artistService.getAll();
+    return response.data.data;
+  }
+);
+
 // create Sliced
 
 export const artistSlice = createSlice({
@@ -37,6 +48,20 @@ export const artistSlice = createSlice({
       })
       .addCase(getAllartist.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+      // Delete artist
+      .addCase(deleteArtist.pending, (state) => {
+        // state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteArtist.fulfilled, (state, action) => {
+        // state.loading = false;
+        state.artist = action.payload;
+        state.error = null;
+      })
+      .addCase(deleteArtist.rejected, (state, action) => {
+        // state.loading = false;
         state.error = action.payload;
       });
   },
