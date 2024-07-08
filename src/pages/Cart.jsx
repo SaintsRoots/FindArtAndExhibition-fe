@@ -9,7 +9,6 @@ import {
   getCart,
   removeItemFromCart,
   selectCartId,
-  
 } from "../features/cart/cartSlice";
 import { useEffect, useState } from "react";
 import { useFormik } from "formik";
@@ -22,6 +21,7 @@ import {
 import Spinner from "../components/Spinner";
 
 import CartImage from "../assets/cart.jpg";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -47,6 +47,7 @@ const Cart = () => {
 
   const name = localStorage.getItem("name");
   const email = localStorage.getItem("email");
+  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
@@ -67,6 +68,9 @@ const Cart = () => {
         setLoading(false);
         notifySuccess(`Successfully ordered ${totalItems} items`);
         formik.resetForm();
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
         await dispatch(getCart());
       } catch (error) {
         setLoading(false);

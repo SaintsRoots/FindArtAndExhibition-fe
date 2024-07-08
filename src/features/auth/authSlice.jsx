@@ -25,7 +25,7 @@ export const makeLogin = createAsyncThunk(
       const response = await loginService.login({ email, password });
       if (response) {
         localStorage.setItem("identity", response.data.data._id);
-        localStorage.setItem("profile", response.data.data.profile);
+        localStorage.setItem("profile", response.data.data.img);
         localStorage.setItem("name", response.data.data.name);
         localStorage.setItem("email", response.data.data.email);
         localStorage.setItem("token", response.data.token);

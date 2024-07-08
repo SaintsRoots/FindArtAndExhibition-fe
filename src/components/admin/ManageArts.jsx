@@ -1,20 +1,20 @@
 import Button from "../../components/form/Button";
 import { IoIosAddCircleOutline } from "react-icons/io";
-import Cards from "./Cards";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectAllarts,
   selectArtsloading,
   selectArtsError,
-  getAllArtsByOwner,
+  getAllArts,
   deleteArts,
 } from "../../features/arts/artsSlice";
 import { useEffect, useState } from "react";
-import Modal from "./ArtsModol";
 import Skeleton from "../skeleton/arts.skeleton";
+import Cards from "../dashboard/Cards";
+import Modal from "../dashboard/ArtsModol";
 
 
-const ManageArt = () => {
+const ManageArts = () => {
   const dispatch = useDispatch();
   const arts = useSelector(selectAllarts);
   const loading = useSelector(selectArtsloading);
@@ -26,17 +26,17 @@ const ManageArt = () => {
   // handle model
   const handleModal = () => {
     setModal(!model);
-    dispatch(getAllArtsByOwner());
+    dispatch(getAllArts());
   };
 
   // handle Delete
   const handleDelete = async (id) => {
     await dispatch(deleteArts(id));
-    dispatch(getAllArtsByOwner()); 
+    dispatch(getAllArts()); 
   };
 
   useEffect(() => {
-    dispatch(getAllArtsByOwner());
+    dispatch(getAllArts());
   }, [dispatch]);
 
   let content;
@@ -81,4 +81,4 @@ const ManageArt = () => {
   );
 };
 
-export default ManageArt;
+export default ManageArts;
