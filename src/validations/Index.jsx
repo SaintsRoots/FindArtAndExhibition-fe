@@ -119,7 +119,7 @@ export const validateArtsForm = (values) => {
   if (!values.name) {
     errors.name = "Arts Name Required";
   }
-  if (!values.category) {
+  if (!values.category || !values.category === "Select Category") {
     errors.category = "Arts category Required";
   }
 

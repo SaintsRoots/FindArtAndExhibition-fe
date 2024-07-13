@@ -35,7 +35,7 @@ const Architecture = () => {
     );
   } else if (arts.length > 0) {
     content = arts
-      .slice(0, 8)
+      .slice(0, 16)
       .map((item, index) => (
         <ArtsCard
           key={index}
