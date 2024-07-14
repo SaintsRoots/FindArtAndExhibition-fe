@@ -4,10 +4,7 @@ import Button from "../form/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import { validateArtsForm } from "../../validations/Index";
-import {
-  createArts,
-  selectArtsloading,
-} from "../../features/arts/artsSlice";
+import { createArts, selectArtsloading } from "../../features/arts/artsSlice";
 import Spinner from "../../components/Spinner";
 import { notifyError, notifySuccess } from "../notifications/notification";
 import { useState } from "react";
@@ -147,17 +144,26 @@ const Modal = ({ close, message, title }) => {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 ">
-            <div>
-              <Input
-                type="input"
-                inputType="text"
-                placeholder="Category Of Arts"
-                label={`Category Of Arts`}
+            <div className="flex flex-col gap-1">
+              <h1 className="text-sm font-medium">Category</h1>
+
+              <select
                 id="category"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 values={formik.values.category}
-              />
+                className={`relative text-primary bg-inherit duration-100 outline-none justify-between flex items-center gap-6 p-3 text-xs  w-full rounded-md font-semibold border-2 group-hover:border-primary`}
+              >
+                <option value="">Select Category</option>
+                <option value="Painting">Painting</option>
+                <option value="Sculpture">Sculpture</option>
+                <option value="Photography">Photography</option>
+                <option value="Architecture">Architecture</option>
+                <option value="Drawings">Drawings</option>
+                <option value="Graphics3D">Graphics3D</option>
+                <option value="Hand Craft">Hand Craft</option>
+                <option value="Wall Gallery">Wall Gallery</option>
+              </select>
               {formik.touched.category && formik.errors.category ? (
                 <p className="text-sm text-red-800 font-normal">
                   {formik.errors.category}
