@@ -99,7 +99,7 @@ export const validateContactForm = (values) => {
     errors.email = "Invalid email address";
   }
 
-  if (!values.name) {
+  if (!values.names) {
     errors.name = "Names Required";
   }
   if (!values.subject) {
