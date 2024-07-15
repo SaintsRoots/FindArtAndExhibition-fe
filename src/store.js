@@ -4,6 +4,7 @@ import artsReducer from "./features/arts/artsSlice";
 import artistReducer from "./features/artist/artistSlice";
 import cartReducer from "./features/cart/cartSlice";
 import ordersReducers from "./features/orders/ordersSlice";
+import contactReducers from "./features/contact/contactSlice";
 
 const store = configureStore({
     reducer: {
@@ -12,6 +13,7 @@ const store = configureStore({
         artist: artistReducer,
         cart: cartReducer,
         orders: ordersReducers,
+        contact: contactReducers,
     },
 });
 

@@ -5,19 +5,36 @@ import { MdPhone } from "react-icons/md";
 import Button from "../components/form/Button";
 import Input from "../components/form/Input";
 import * as formValidation from "../validations/Index";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  createMessage,
+  selectContactloading,
+} from "../features/contact/contactSlice";
 import { useFormik } from "formik";
+import {
+  notifyError,
+  notifySuccess,
+} from "../components/notifications/notification";
+import Spinner from "../components/Spinner";
 const Contact = () => {
-
+  const dispatch = useDispatch();
+  const loading = useSelector(selectContactloading);
   const formik = useFormik({
     validate: formValidation.validateContactForm,
     initialValues: {
-      name: "",
+      names: "",
       email: "",
       subject: "",
       message: "",
     },
-    onSubmit: async (values) =>{
-
+    onSubmit: async (values) => {
+      try {
+        await dispatch(createMessage(values));
+        notifySuccess("Success");
+        formik.resetForm();
+      } catch (error) {
+        notifyError(error.message);
+      }
     },
   });
   return (
@@ -50,14 +67,14 @@ const Contact = () => {
                 type="input"
                 placeholder="John doe"
                 style={`bg-secondary`}
-                id="name"
+                id="names"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                values={formik.values.name}
+                values={formik.values.names}
               />
-              {formik.touched.name && formik.errors.name ? (
+              {formik.touched.names && formik.errors.names ? (
                 <p className=" text-sm text-red-800 font-normal ">
-                  {formik.errors.name}
+                  {formik.errors.names}
                 </p>
               ) : null}
             </div>
@@ -112,7 +129,7 @@ const Contact = () => {
             </div>
             <Button
               click={() => formik.submitForm()}
-              title="Leave message"
+              title={loading ? <Spinner /> : "Leave message"}
               styles="w-full col-span-2 !scale-100"
             />
           </div>
