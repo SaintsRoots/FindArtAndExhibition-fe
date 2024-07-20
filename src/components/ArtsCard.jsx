@@ -15,8 +15,8 @@ const ArtsCard = ({ name, price, image, money, id }) => {
     const toastId = `toast-${id}`; // Unique toast ID based on product ID
     try {
       await dispatch(addItemToCart({ productId, quantity: 1 })).unwrap();
-      dispatch(getCart());
       notifySuccess(toastId);
+      dispatch(getCart());
     } catch (error) {
       notifyError(toastId);
       console.error("Failed to add item to cart:", error);
