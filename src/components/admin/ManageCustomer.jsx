@@ -20,7 +20,7 @@ const MNgeCustomer = () => {
   const loading = useSelector(selectartistloading);
   const errors = useSelector(selectartistError);
   const approvedArtists = artists.filter(
-    (artist) => artist.status === "pending" 
+    (artist) => artist.role === "User" 
   );
   const [localLoading, setLocalLoading] = useState({});
   const [modalOpen, setModalOpen] = useState(false);

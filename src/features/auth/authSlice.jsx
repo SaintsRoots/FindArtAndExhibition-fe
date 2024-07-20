@@ -6,6 +6,7 @@ const initialState = {
     ? {
         profile: localStorage.getItem("profile"),
         name: localStorage.getItem("email"),
+        phone: localStorage.getItem("phone"),
         isAdmin: localStorage.getItem("isAdmin") === "true",
         isArtist: localStorage.getItem("role") === "Artist" && localStorage.getItem("status") === "approved",
       }
@@ -27,6 +28,7 @@ export const makeLogin = createAsyncThunk(
         localStorage.setItem("identity", response.data.data._id);
         localStorage.setItem("profile", response.data.data.img);
         localStorage.setItem("name", response.data.data.name);
+        localStorage.setItem("phone", response.data.data.phone);
         localStorage.setItem("email", response.data.data.email);
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("isAdmin", String(response.data.data.isAdmin));

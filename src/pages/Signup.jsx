@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { FaUserTie } from "react-icons/fa";
-import {  toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -20,12 +21,25 @@ function Signup() {
   const dispatch = useDispatch();
   const loading = useSelector(selectLoginStatus);
   const loginError = useSelector(selectLoginError);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [role, setRole] = useState(""); 
+
+  const handleFileChange = (event) => {
+    setSelectedFile(event.currentTarget.files[0]);
+    formik.setFieldValue("img", event.currentTarget.files[0]);
+  };
+
+  const handleRoleChange = (event) => {
+    setRole(event.target.value); 
+    formik.handleChange(event);
+  };
 
   const formik = useFormik({
     initialValues: {
       name: "",
       email: "",
       password: "",
+      img: "",
       role: "",
     },
     validate: forValidation.validateAuth,
@@ -35,10 +49,13 @@ function Signup() {
       formData.append("email", values.email);
       formData.append("password", values.password);
       formData.append("role", values.role);
-
+      if (selectedFile) {
+        formData.append("img", selectedFile);
+      }
       const resultAction = await dispatch(
         makeSignup({
           name: values.name,
+          img: values.img,
           email: values.email,
           password: values.password,
           role: values.role,
@@ -64,7 +81,7 @@ function Signup() {
   });
 
   const notify = () => {
-    toast.success("Application Succesfully!", {
+    toast.success("Application Successfully!", {
       position: "top-right",
       autoClose: 5000,
       hideProgressBar: false,
@@ -75,6 +92,7 @@ function Signup() {
       theme: "dark",
     });
   };
+
   return (
     <div className="bg-secondary w-full min-h-screen mt-12 flex flex-col justify-center items-center">
       <div className="w-full flex flex-col justify-center items-center">
@@ -137,9 +155,9 @@ function Signup() {
                   className="w-full border-0 outline-none"
                   id="role"
                   icon={<FaLock />}
-                  onChange={formik.handleChange}
+                  onChange={handleRoleChange} // Updated to handleRoleChange
                   onBlur={formik.handleBlur}
-                  values={formik.values.role}
+                  value={formik.values.role} // Updated to value
                 >
                   <option>Choose Your Role</option>
                   <option value="Artist">Artist</option>
@@ -152,6 +170,22 @@ function Signup() {
                 </p>
               )}
             </div>
+            {role === "Artist" && ( 
+              <div className="w-full">
+                <label htmlFor="img">Add Image</label>
+                <div className="w-full h-16 relative border border-dashed border-blue-800 rounded-md">
+                  <Input
+                    type="input"
+                    inputType="file"
+                    id="img"
+                    style={`!absolute !w-full !h-full !top-0 !left-0 `}
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    onBlur={formik.handleBlur}
+                  />
+                </div>
+              </div>
+            )}
             <div className="mt-6 mdl:mt-[34px] w-full">
               <Input
                 type="input"
@@ -172,7 +206,13 @@ function Signup() {
             </div>
             <Button
               click={formik.submitForm}
-              title={loading ? <Spinner classes={` !text-white !h-6 !w-6`} /> : "Signup"}
+              title={
+                loading ? (
+                  <Spinner classes={` !text-white !h-6 !w-6`} />
+                ) : (
+                  "Signup"
+                )
+              }
               styles="w-full !scale-100 mt-6 mdl:mt-12 bg-primary text-white"
             />
             <div className="mt-6 flex flex-col md:flex-row gap-2 justify-between">

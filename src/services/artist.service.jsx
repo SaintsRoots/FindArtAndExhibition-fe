@@ -11,6 +11,9 @@ class usersDataService {
   approve(id) {
     return http.post(`/users/${id}/artist`);
   }
+  cancel(id) {
+    return http.post(`/users/${id}/cancel`);
+  }
   update(id, data, token) {
     return http.put(`/users/${id}`, data, {
       headers: {
