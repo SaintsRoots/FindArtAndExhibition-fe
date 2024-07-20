@@ -22,6 +22,7 @@ import Spinner from "../components/Spinner";
 
 import CartImage from "../assets/cart.jpg";
 import { useNavigate } from "react-router-dom";
+// import App from "../components/flutterWave/useComponents";
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -193,6 +194,13 @@ const Cart = () => {
                 <p className="text-sm text-slate-600">{totalPrice} frw</p>
               </div>
             </div>
+            {/* <App
+              totalPrice={totalPrice}
+              name={name}
+              email={email}
+              amaunt={totalPrice}
+              phone_number={`0729800742`}
+            /> */}
             <Button
               click={formik.handleSubmit}
               title={

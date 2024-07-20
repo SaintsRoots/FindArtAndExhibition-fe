@@ -8,7 +8,9 @@ class usersDataService {
   get(id) {
     return http.get(`/users/${id}`);
   }
-
+  approve(id) {
+    return http.post(`/users/${id}/artist`);
+  }
   update(id, data, token) {
     return http.put(`/users/${id}`, data, {
       headers: {

@@ -71,6 +71,7 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         >
+       
           <Route index element={<Admin />} />
           <Route path="*" element={<NotFound />} />
           <Route path="settings" element={<Settings />} />

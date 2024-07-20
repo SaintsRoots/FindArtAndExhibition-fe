@@ -7,14 +7,14 @@ const initialState = {
         profile: localStorage.getItem("profile"),
         name: localStorage.getItem("email"),
         isAdmin: localStorage.getItem("isAdmin") === "true",
-        isArtist: localStorage.getItem("role") === "Artist",
+        isArtist: localStorage.getItem("role") === "Artist" && localStorage.getItem("status") === "approved",
       }
     : null,
   loading: false,
   error: null,
   isAuthenticated: !!localStorage.getItem("token"),
   isAdmin: localStorage.getItem("isAdmin") === "true",
-  isArtist: localStorage.getItem("role") === "Artist",
+  isArtist: localStorage.getItem("role") === "Artist" && localStorage.getItem("status") === "approved",
   users: [],
 };
 
@@ -31,6 +31,7 @@ export const makeLogin = createAsyncThunk(
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("isAdmin", String(response.data.data.isAdmin));
         localStorage.setItem("role", response.data.data.role);
+        localStorage.setItem("status", response.data.data.status);
       }
       return response.data.data;
     } catch (error) {
@@ -126,6 +127,7 @@ export const logout = createAsyncThunk(
       localStorage.removeItem("token");
       localStorage.removeItem("isAdmin");
       localStorage.removeItem("role");
+      localStorage.removeItem("status");
       return true;
     } catch (error) {
       return rejectWithValue("Failed to logout.");
@@ -146,7 +148,7 @@ export const loginSlice = createSlice({
         state.loading = false;
         state.userData = action.payload;
         state.isAdmin = action.payload.isAdmin;
-        state.isArtist = action.payload.role === "Artist";
+        state.isArtist = action.payload.role === "Artist" && action.payload.status === "approved";
         state.error = null;
         state.isAuthenticated = true;
       })

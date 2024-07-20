@@ -12,15 +12,30 @@ import Button from "../form/Button";
 import { MdEdit, MdDelete } from "react-icons/md";
 import { notifyError, notifySuccess } from "../notifications/notification";
 import Spinner from "../Spinner";
+import Modal from "./EditUserModal";
 
-const ManageCustomer = () => {
+const MNgeCustomer = () => {
   const dispatch = useDispatch();
   const artists = useSelector(selectAllartist);
   const loading = useSelector(selectartistloading);
   const errors = useSelector(selectartistError);
-  const artist = artists.filter((artist) => artist.status === "pending");
-
+  const approvedArtists = artists.filter(
+    (artist) => artist.status === "pending" 
+  );
   const [localLoading, setLocalLoading] = useState({});
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedArtist, setSelectedArtist] = useState(null);
+
+  // Handle modal
+  const handleModal = (artist) => {
+    setSelectedArtist(artist);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedArtist(null);
+  };
 
   useEffect(() => {
     dispatch(getAllartist());
@@ -54,7 +69,7 @@ const ManageCustomer = () => {
                 ))
               ) : errors ? (
                 <div className="text-red-600">{errors}</div>
-              ) : artist.length === 0 ? (
+              ) : approvedArtists.length === 0 ? (
                 <div className="text-gray-600 min-w-full justify-center items-center">
                   No data found
                 </div>
@@ -80,49 +95,47 @@ const ManageCustomer = () => {
                       <th scope="col" className={thClasses}>
                         Sector
                       </th>
-                      <th scope="col" colSpan={`2`} className={thClasses}>
+                      <th scope="col" className={thClasses}>
                         Action
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-neutral-700">
-                    {artist.map((artists, index) => (
+                    {approvedArtists.map((artist, index) => (
                       <tr
                         className="text-sm font-medium text-gray-600"
                         key={index}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {artists?.name || "N/A"}
+                          {artist?.name || "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {artists?.email || "N/A"}
+                          {artist?.email || "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {artists?.phone || "N/A"}
+                          {artist?.phone || "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {artists?.province || "N/A"}
+                          {artist?.province || "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {artists?.district || "N/A"}
+                          {artist?.district || "N/A"}
                         </td>
-
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {artists?.sector || "N/A"}
+                          {artist?.sector || "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-end flex justify-end gap-2">
                           <Button
                             icon={<MdEdit className="!text-indigo-600" />}
                             styles="!bg-indigo-100"
-                            // click={() => {
-                            //   setOpenEdit(true);
-                            //   handleGetUserById(user?._id);
-                            // }}
+                            click={() => {
+                              handleModal(artist);
+                              dispatch(getAllartist());
+                            }}
                           />
-
                           <Button
                             icon={
-                              localLoading[artists._id] ? (
+                              localLoading[artist._id] ? (
                                 <Spinner classes={`!h-4`} />
                               ) : (
                                 <MdDelete className="!text-red-600" />
@@ -130,7 +143,7 @@ const ManageCustomer = () => {
                             }
                             styles="!bg-indigo-100"
                             click={() => {
-                              handleDelete(artists?._id);
+                              handleDelete(artist?._id);
                             }}
                           />
                         </td>
@@ -140,6 +153,20 @@ const ManageCustomer = () => {
                 </table>
               )}
             </div>
+            {modalOpen && selectedArtist && (
+              <Modal
+                close={closeModal}
+                id={selectedArtist._id}
+                name={selectedArtist.name}
+                email={selectedArtist.email}
+                img={selectedArtist.img}
+                phone={selectedArtist.phone}
+                province={selectedArtist.province}
+                district={selectedArtist.district}
+                sector={selectedArtist.sector}
+                street={selectedArtist.street}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -147,4 +174,4 @@ const ManageCustomer = () => {
   );
 };
 
-export default ManageCustomer;
+export default MNgeCustomer;
