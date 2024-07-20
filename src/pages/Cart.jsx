@@ -68,11 +68,11 @@ const Cart = () => {
         ).unwrap();
         setLoading(false);
         notifySuccess(`Successfully ordered ${totalItems} items`);
+        await dispatch(getCart());
         formik.resetForm();
         setTimeout(() => {
           navigate("/");
         }, 1500);
-        await dispatch(getCart());
       } catch (error) {
         setLoading(false);
         notifyError(error.message);

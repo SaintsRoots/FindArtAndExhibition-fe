@@ -49,9 +49,9 @@ export const getOrdersCustomer = createAsyncThunk(
 
 export const makeOrders = createAsyncThunk(
   "orders/makeOrders ",
-  async ({ cartId, paymentMethod, shippingAddress }, { rejectWithValue }) => {
+  async ({ cartId, shippingAddress }, { rejectWithValue }) => {
     try {
-      const data = { paymentMethod, shippingAddress };
+      const data = { shippingAddress };
       const response = await ordersService.create(cartId, data);
       return response.data?.data;
     } catch (error) {
