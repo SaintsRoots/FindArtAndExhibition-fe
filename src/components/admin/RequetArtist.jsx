@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import Skeleton from "../skeleton/artistOrder.skelton";
 import {
@@ -5,51 +6,35 @@ import {
   getAllartist,
   selectartistloading,
   selectartistError,
-  deleteArtist,
+  approveArtist,
 } from "../../features/artist/artistSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Button from "../form/Button";
-import { MdEdit, MdDelete } from "react-icons/md";
+import { IoMdDoneAll } from "react-icons/io";
 import { notifyError, notifySuccess } from "../notifications/notification";
 import Spinner from "../Spinner";
-import Modal from "./EditUserModal";
 
-const ManageArtist = () => {
+const RequetArtist = () => {
   const dispatch = useDispatch();
   const artists = useSelector(selectAllartist);
   const loading = useSelector(selectartistloading);
   const errors = useSelector(selectartistError);
-  const approvedArtists = artists.filter(
-    (artist) => artist.status === "approved" && artist.role === "Artist"
-  );
+  const artist = artists.filter((artist) => artist.status === "pending" && artist.role === "Artist");
   const [localLoading, setLocalLoading] = useState({});
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedArtist, setSelectedArtist] = useState(null);
-
-  // Handle modal
-  const handleModal = (artist) => {
-    setSelectedArtist(artist);
-    setModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setModalOpen(false);
-    setSelectedArtist(null);
-  };
 
   useEffect(() => {
     dispatch(getAllartist());
   }, [dispatch]);
 
-  const handleDelete = async (id) => {
+  const handlRequest = async (id) => {
     try {
       setLocalLoading((prev) => ({ ...prev, [id]: true }));
-      await dispatch(deleteArtist(id));
-      notifySuccess("Deleted Successfully");
+      await dispatch(approveArtist(id));
+      notifySuccess("Aproved Successfully");
       setLocalLoading((prev) => ({ ...prev, [id]: false }));
       await dispatch(getAllartist());
     } catch (error) {
-      console.error("Error deleting artist:", error.message);
+      console.error("Error Approving artist:", error.message);
       notifyError(error.message);
       setLocalLoading((prev) => ({ ...prev, [id]: false }));
     }
@@ -59,6 +44,7 @@ const ManageArtist = () => {
     "px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500 text-nowrap";
   return (
     <div className="flex flex-col gap-2 ">
+        <h2>All Reqest From Artist</h2>
       <div className="flex flex-col w-full bg-white">
         <div className="-m-1.5 overflow-x-auto">
           <div className="p-1.5 min-w-full inline-block align-middle">
@@ -69,7 +55,7 @@ const ManageArtist = () => {
                 ))
               ) : errors ? (
                 <div className="text-red-600">{errors}</div>
-              ) : approvedArtists.length === 0 ? (
+              ) : artist.length === 0 ? (
                 <div className="text-gray-600 min-w-full justify-center items-center">
                   No data found
                 </div>
@@ -101,49 +87,43 @@ const ManageArtist = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-neutral-700">
-                    {approvedArtists.map((artist, index) => (
+                    {artist.map((artists, index) => (
                       <tr
                         className="text-sm font-medium text-gray-600"
                         key={index}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {artist?.name || "N/A"}
+                          {artists?.name || "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {artist?.email || "N/A"}
+                          {artists?.email || "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {artist?.phone || "N/A"}
+                          {artists?.phone || "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {artist?.province || "N/A"}
+                          {artists?.province || "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {artist?.district || "N/A"}
+                          {artists?.district || "N/A"}
                         </td>
+
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {artist?.sector || "N/A"}
+                          {artists?.sector || "N/A"}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-end flex justify-end gap-2">
-                          <Button
-                            icon={<MdEdit className="!text-indigo-600" />}
-                            styles="!bg-indigo-100"
-                            click={() => {
-                              handleModal(artist);
-                              dispatch(getAllartist());
-                            }}
-                          />
+                        <td className=" py-4 whitespace-nowrap text-end flex justify-center gap-2">
+
                           <Button
                             icon={
-                              localLoading[artist._id] ? (
+                              localLoading[artists._id] ? (
                                 <Spinner classes={`!h-4`} />
                               ) : (
-                                <MdDelete className="!text-red-600" />
+                                <IoMdDoneAll className="!text-primary font-bold " />
                               )
                             }
                             styles="!bg-indigo-100"
                             click={() => {
-                              handleDelete(artist?._id);
+                              handlRequest(artists?._id);
                             }}
                           />
                         </td>
@@ -153,20 +133,6 @@ const ManageArtist = () => {
                 </table>
               )}
             </div>
-            {modalOpen && selectedArtist && (
-              <Modal
-                close={closeModal}
-                id={selectedArtist._id}
-                name={selectedArtist.name}
-                email={selectedArtist.email}
-                img={selectedArtist.img}
-                phone={selectedArtist.phone}
-                province={selectedArtist.province}
-                district={selectedArtist.district}
-                sector={selectedArtist.sector}
-                street={selectedArtist.street}
-              />
-            )}
           </div>
         </div>
       </div>
@@ -174,4 +140,4 @@ const ManageArtist = () => {
   );
 };
 
-export default ManageArtist;
+export default RequetArtist;

@@ -10,7 +10,7 @@ import { RiLogoutCircleRLine } from "react-icons/ri";
 export const adminNav = [
   {
     name: "Dashboard",
-    path: "dashboard/admin",
+    path: "",
     icon: <FaTachometerAlt />,
   },
   {

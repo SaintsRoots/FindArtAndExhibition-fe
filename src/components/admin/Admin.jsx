@@ -1,8 +1,7 @@
+import RequetArtist from "./RequetArtist";
 
 const Admin = () => {
-  return (
-    <div>Admin Dashboard</div>
-  )
-}
+  return <RequetArtist />;
+};
 
-export default Admin
+export default Admin;
