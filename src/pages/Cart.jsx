@@ -22,7 +22,8 @@ import Spinner from "../components/Spinner";
 
 import CartImage from "../assets/cart.jpg";
 import { useNavigate } from "react-router-dom";
-// import App from "../components/flutterWave/useComponents";
+import FlutterwavePayment from "../components/flutterWave/FlutterwavePayment";
+
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -48,11 +49,11 @@ const Cart = () => {
 
   const name = localStorage.getItem("name");
   const email = localStorage.getItem("email");
+  const phone = localStorage.getItem("phone");
   const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
-      paymentMethod: "",
       shippingAddress: "",
     },
     validate: validateCheckout,
@@ -62,7 +63,6 @@ const Cart = () => {
         await dispatch(
           makeOrders({
             cartId: cartId,
-            paymentMethod: values.paymentMethod,
             shippingAddress: values.shippingAddress,
           })
         ).unwrap();
@@ -114,11 +114,7 @@ const Cart = () => {
                 </a>{" "}
                 and Add yours
               </p>
-              <image
-                src={CartImage}
-                alt={`Cart Image`}
-                className=" object-cover "
-              />
+            <img src={CartImage} alt="Cart items_image" />
             </div>
           )}
         </div>
@@ -143,29 +139,6 @@ const Cart = () => {
               type={`input`}
               values={email}
             />
-            <div className="w-full flex flex-col gap-2">
-              <h1 className="text-sm font-medium">Payment Type</h1>
-              <div
-                className={`relative text-primary duration-100 outline-none flex flex-col gap-6 p-3 w-full rounded-md font-semibold border-2 hover:border-primary`}
-              >
-                <select
-                  className="w-full border-0 text-xs outline-none"
-                  id="paymentMethod"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  values={formik.values.paymentMethod}
-                >
-                  <option>Choose Payment Type</option>
-                  <option value="MTN">MTN Mobile Money</option>
-                  <option value="AITEL">AITEL Mobile Money</option>
-                </select>
-                {formik.touched.paymentMethod && formik.errors.paymentMethod ? (
-                  <p className="text-sm text-red-800 font-normal">
-                    {formik.errors.paymentMethod}
-                  </p>
-                ) : null}
-              </div>
-            </div>
             <div className="w-full">
               <Input
                 label={`Shipping Address`}
@@ -194,17 +167,19 @@ const Cart = () => {
                 <p className="text-sm text-slate-600">{totalPrice} frw</p>
               </div>
             </div>
-            {/* <App
-              totalPrice={totalPrice}
-              name={name}
-              email={email}
-              amaunt={totalPrice}
-              phone_number={`0729800742`}
-            /> */}
             <Button
               click={formik.handleSubmit}
               title={
-                loading ? <Spinner classes={`!h-4`} /> : `Pay ${totalPrice} frw`
+                loading ? (
+                  <Spinner classes="!h-4" />
+                ) : (
+                  <FlutterwavePayment
+                    amount={totalPrice}
+                    email={email}
+                    phone={phone}
+                    name={name}
+                  />
+                )
               }
             />
           </div>

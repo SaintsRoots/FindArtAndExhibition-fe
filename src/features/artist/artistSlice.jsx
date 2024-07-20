@@ -28,7 +28,6 @@ export const deleteArtist = createAsyncThunk(
   }
 );
 
-
 export const approveArtist = createAsyncThunk(
   "artist/approveArtist",
   async (id) => {
@@ -36,7 +35,15 @@ export const approveArtist = createAsyncThunk(
     const response = await artistService.getAll();
     return response.data.data;
   }
-)
+);
+export const cancelArtist = createAsyncThunk(
+  "artist/cancelArtist",
+  async (id) => {
+    await artistService.cancel(id);
+    const response = await artistService.getAll();
+    return response.data.data;
+  }
+);
 // create Sliced
 
 export const artistSlice = createSlice({
@@ -61,31 +68,37 @@ export const artistSlice = createSlice({
       })
       // Delete artist
       .addCase(deleteArtist.pending, (state) => {
-        // state.loading = true;
         state.error = null;
       })
       .addCase(deleteArtist.fulfilled, (state, action) => {
-        // state.loading = false;
         state.artist = action.payload;
         state.error = null;
       })
       .addCase(deleteArtist.rejected, (state, action) => {
-        // state.loading = false;
         state.error = action.payload;
       })
+      // approve artist request
       .addCase(approveArtist.pending, (state) => {
-        // state.loading = true;
         state.error = null;
       })
       .addCase(approveArtist.fulfilled, (state, action) => {
-        // state.loading = false;
         state.artist = action.payload;
         state.error = null;
       })
       .addCase(approveArtist.rejected, (state, action) => {
-        // state.loading = false;
         state.error = action.payload;
-      });
+      })
+      // cancel artist request
+      .addCase(cancelArtist.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(cancelArtist.fulfilled, (state, action) => {
+        state.artist = action.payload;
+        state.error = null;
+      })
+      .addCase(cancelArtist.rejected, (state, action) => {
+        state.error = action.payload;
+      })
   },
 });
 

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import Skeleton from "../skeleton/artistOrder.skelton";
 import {
@@ -7,25 +6,58 @@ import {
   selectartistloading,
   selectartistError,
   approveArtist,
+  cancelArtist,
 } from "../../features/artist/artistSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Button from "../form/Button";
 import { IoMdDoneAll } from "react-icons/io";
+import { FaExpand } from "react-icons/fa6";
+import { TiCancel } from "react-icons/ti";
 import { notifyError, notifySuccess } from "../notifications/notification";
 import Spinner from "../Spinner";
+import Modal from "./ExpandData";
 
 const RequetArtist = () => {
   const dispatch = useDispatch();
   const artists = useSelector(selectAllartist);
   const loading = useSelector(selectartistloading);
   const errors = useSelector(selectartistError);
-  const artist = artists.filter((artist) => artist.status === "pending" && artist.role === "Artist");
+  const artist = artists.filter(
+    (artist) => artist.status === "pending" && artist.role === "Artist"
+  );
   const [localLoading, setLocalLoading] = useState({});
+  const [localLoadingi, setLocalLoadingi] = useState({});
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedArtist, setSelectedArtist] = useState(null);
+
+  // Handle modal
+  const handleModal = (artist) => {
+    setSelectedArtist(artist);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedArtist(null);
+  };
 
   useEffect(() => {
     dispatch(getAllartist());
   }, [dispatch]);
 
+  const handlCancel = async (id) => {
+    try {
+      setLocalLoadingi((prev) => ({ ...prev, [id]: true }));
+      await dispatch(cancelArtist(id));
+      notifySuccess("Canceled Successfully");
+      setLocalLoadingi((prev) => ({ ...prev, [id]: false }));
+      await dispatch(getAllartist());
+    } catch (error) {
+      console.error("Error Canceling artist:", error.message);
+      notifyError(error.message);
+      setLocalLoadingi((prev) => ({ ...prev, [id]: false }));
+    }
+  };
   const handlRequest = async (id) => {
     try {
       setLocalLoading((prev) => ({ ...prev, [id]: true }));
@@ -44,7 +76,7 @@ const RequetArtist = () => {
     "px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500 text-nowrap";
   return (
     <div className="flex flex-col gap-2 ">
-        <h2>All Reqest From Artist</h2>
+      <h2>All Reqest From Artist</h2>
       <div className="flex flex-col w-full bg-white">
         <div className="-m-1.5 overflow-x-auto">
           <div className="p-1.5 min-w-full inline-block align-middle">
@@ -112,7 +144,6 @@ const RequetArtist = () => {
                           {artists?.sector || "N/A"}
                         </td>
                         <td className=" py-4 whitespace-nowrap text-end flex justify-center gap-2">
-
                           <Button
                             icon={
                               localLoading[artists._id] ? (
@@ -126,6 +157,28 @@ const RequetArtist = () => {
                               handlRequest(artists?._id);
                             }}
                           />
+                          <Button
+                            icon={
+                              localLoadingi[artists._id] ? (
+                                <Spinner classes={`!h-4`} />
+                              ) : (
+                                <TiCancel className="!text-red-600 font-bold " />
+                              )
+                            }
+                            styles="!bg-indigo-100"
+                            click={() => {
+                              handlCancel(artists?._id);
+                            }}
+                          />
+                          <Button
+                            icon={
+                              <FaExpand className="!text-primary font-bold " />
+                            }
+                            styles="!bg-indigo-100"
+                            click={() => {
+                              handleModal(artists);
+                            }}
+                          />
                         </td>
                       </tr>
                     ))}
@@ -133,6 +186,15 @@ const RequetArtist = () => {
                 </table>
               )}
             </div>
+            {modalOpen && selectedArtist && (
+              <Modal
+                close={closeModal}
+                id={selectedArtist._id}
+                name={selectedArtist.name}
+                image={selectedArtist.img}
+                email={selectedArtist.email}
+              />
+            )}
           </div>
         </div>
       </div>
