@@ -14,14 +14,22 @@ const ArtsCard = ({ name, price, image, money, id }) => {
     setLocalLoading(true);
     const toastId = `toast-${id}`; // Unique toast ID based on product ID
     try {
-      await dispatch(addItemToCart({ productId, quantity: 1 })).unwrap();
-      notifySuccess(toastId);
+      const resultAction = await dispatch(addItemToCart({ productId, quantity: 1 }));
+      handleResultAction(resultAction, toastId);
       dispatch(getCart());
     } catch (error) {
       notifyError(toastId);
       console.error("Failed to add item to cart:", error);
     } finally {
       setLocalLoading(false);
+    }
+  };
+
+  const handleResultAction = (resultAction, toastId) => {
+    if (addItemToCart.fulfilled.match(resultAction)) {
+      notifySuccess(toastId);
+    } else {
+      notifyError(toastId);
     }
   };
 

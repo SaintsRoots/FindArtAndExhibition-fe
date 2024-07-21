@@ -1,7 +1,10 @@
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
+import { useFormik } from "formik";
 import CartCard from "../components/CartCard";
 import Button from "../components/form/Button";
 import Input from "../components/form/Input";
-import { useSelector, useDispatch } from "react-redux";
+import Modal from "../components/CartModel";
 import {
   selectAllcart,
   selectTotalPrice,
@@ -10,8 +13,6 @@ import {
   removeItemFromCart,
   selectCartId,
 } from "../features/cart/cartSlice";
-import { useEffect, useState } from "react";
-import { useFormik } from "formik";
 import { makeOrders } from "../features/orders/ordersSlice";
 import { validateCheckout } from "../validations/Index";
 import {
@@ -19,11 +20,8 @@ import {
   notifySuccess,
 } from "../components/notifications/notification";
 import Spinner from "../components/Spinner";
-
 import CartImage from "../assets/cart.jpg";
-import { useNavigate } from "react-router-dom";
 import FlutterwavePayment from "../components/flutterWave/FlutterwavePayment";
-
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -33,6 +31,7 @@ const Cart = () => {
   const cartId = useSelector(selectCartId);
 
   const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleRemoveItem = async (productId) => {
     try {
@@ -50,7 +49,6 @@ const Cart = () => {
   const name = localStorage.getItem("name");
   const email = localStorage.getItem("email");
   const phone = localStorage.getItem("phone");
-  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
@@ -68,11 +66,9 @@ const Cart = () => {
         ).unwrap();
         setLoading(false);
         notifySuccess(`Successfully ordered ${totalItems} items`);
+        setIsModalOpen(true);  // Open the modal after a successful order
         await dispatch(getCart());
         formik.resetForm();
-        setTimeout(() => {
-          navigate("/");
-        }, 1500);
       } catch (error) {
         setLoading(false);
         notifyError(error.message);
@@ -82,6 +78,7 @@ const Cart = () => {
 
   return (
     <div className="container mx-auto px-6 md:px-14 min-h-screen pt-14 pb-14 mt-14 flex flex-col gap-12 justify-center">
+      {isModalOpen && <Modal close={() => setIsModalOpen(false)}  email={email} />}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
           <div>
@@ -114,7 +111,7 @@ const Cart = () => {
                 </a>{" "}
                 and Add yours
               </p>
-            <img src={CartImage} alt="Cart items_image" />
+              <img src={CartImage} alt="Cart items_image" />
             </div>
           )}
         </div>
@@ -168,10 +165,11 @@ const Cart = () => {
               </div>
             </div>
             <Button
+              styles={`!p-0`}
               click={formik.handleSubmit}
               title={
                 loading ? (
-                  <Spinner classes="!h-4" />
+                  <Spinner classes="!h-10" />
                 ) : (
                   <FlutterwavePayment
                     amount={totalPrice}
