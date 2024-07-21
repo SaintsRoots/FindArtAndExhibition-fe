@@ -23,7 +23,7 @@ const FlutterwavePayment = ({ amount, email, phone, name }) => {
   const handleFlutterPayment = useFlutterwave(config);
 
   return (
-    <button
+    <button className="!w-full  p-3 !h-full"
       onClick={() => {
         handleFlutterPayment({
           callback: (response) => {
