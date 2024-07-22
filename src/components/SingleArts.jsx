@@ -36,12 +36,20 @@ const SingleArts = () => {
   const handleAddItemToCart = async (productId) => {
     setLocalLoading(true);
     try {
-      await dispatch(addItemToCart({ productId, quantity: 1 }));
-      notifySuccess("Item Added Well!");
+      const resultAction = await dispatch(addItemToCart({ productId, quantity: 1 }));
+      handleResultAction(resultAction);
+
     } catch (error) {
       notifyError(error.message);
     } finally {
       setLocalLoading(false);
+    }
+  };
+  const handleResultAction = (resultAction) => {
+    if (addItemToCart.fulfilled.match(resultAction)) {
+      notifySuccess("Item Added Well!");
+    } else {
+      notifyError("Please First Login");
     }
   };
 
