@@ -59,6 +59,17 @@ export const makeOrders = createAsyncThunk(
     }
   }
 );
+export const completePayment = createAsyncThunk(
+  "orders/approvesPayment",
+  async (orderId, { rejectWithValue }) => {
+    try {
+      const response = await ordersService.aprovePayment(orderId);
+      return response.data?.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
 
 const calculateTotalRevenue = (orders) => {
   return orders.reduce((total, order) => total + order.totalPrice, 0);
@@ -129,12 +140,23 @@ const orderSlice = createSlice({
       .addCase(makeOrders.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // complete payment
+      .addCase(completePayment.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(completePayment.fulfilled, (state, action) => {
+        state.orders = action.payload;
+        state.error = null;
+      })
+      .addCase(completePayment.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
 });
 
 // Selectors
-export const selectOrders = (state) => state.orders.orders;
+export const selectOrders = (state) => state.orders.orders || [];
 export const selectCustomers = (state) => state.orders.customers;
 export const selectOrdersLoading = (state) => state.orders.loading;
 export const selectOrdersError = (state) => state.orders.error;

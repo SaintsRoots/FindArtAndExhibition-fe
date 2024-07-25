@@ -21,6 +21,9 @@ class checkoutDataService {
   create(cartId, data) {
     return http.post(`/checkout/${cartId}`, data);
   }
+  aprovePayment(orderId) {
+    return http.post(`/checkout/${orderId}/complete`);
+  }
 }
 
 const checkoutService = new checkoutDataService();

@@ -1,12 +1,18 @@
 import { useSelector, useDispatch } from "react-redux";
+import { IoMdDoneAll } from "react-icons/io";
+import { GoIssueReopened } from "react-icons/go";
 import {
   selectOrders,
   selectOrdersLoading,
   selectOrdersError,
   getAllOrders,
+  completePayment,
 } from "../../features/orders/ordersSlice";
 import Skeleton from "../skeleton/artistOrder.skelton";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Button from "../form/Button";
+import Spinner from "../Spinner";
+import { notifyError, notifySuccess } from "../notifications/notification";
 
 const Orders = () => {
   const thClasses =
@@ -16,6 +22,22 @@ const Orders = () => {
   const loading = useSelector(selectOrdersLoading);
   const errors = useSelector(selectOrdersError);
   const orders = useSelector(selectOrders);
+
+  const [localLoading, setLocalLoading] = useState({});
+
+  const handleCompletePayment = async (id) => {
+    try {
+      setLocalLoading((prev) => ({ ...prev, [id]: true }));
+      await dispatch(completePayment(id)).unwrap();
+      notifySuccess("Approved Successfully");
+      setLocalLoading((prev) => ({ ...prev, [id]: false }));
+      await dispatch(getAllOrders()).unwrap();
+    } catch (error) {
+      console.error("Error Approving Payment:", error.message);
+      notifyError(error.message);
+      setLocalLoading((prev) => ({ ...prev, [id]: false }));
+    }
+  };
 
   useEffect(() => {
     dispatch(getAllOrders());
@@ -33,7 +55,7 @@ const Orders = () => {
                 ))
               ) : errors ? (
                 <div className="text-red-600">{errors}</div>
-              ) : orders.length === 0 ? (
+              ) : !Array.isArray(orders) || orders.length === 0 ? (
                 <div className="text-gray-600 min-w-full justify-center items-center">
                   No data found
                 </div>
@@ -63,42 +85,89 @@ const Orders = () => {
                         Address
                       </th>
                       <th scope="col" className={thClasses}>
+                        Status
+                      </th>
+                      <th scope="col" className={thClasses}>
                         Total Items
                       </th>
                       <th scope="col" className={thClasses}>
                         Total Price
                       </th>
+                      <th scope="col" className={thClasses}>
+                        Action
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-neutral-700">
-                    {orders.map((order, index) => (
-                      <tr className="text-sm font-medium text-gray-600" key={index}>
+                    {orders.map((order) => (
+                      <tr
+                        className="text-sm font-medium text-gray-600"
+                        key={order._id}
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {order?.user?.name || 'N/A'}
+                          {order?.user?.name || "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {order?.user?.email || 'N/A'}
+                          {order?.user?.email || "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {order.items ? order.items.map(item => item.product?.owner?.name || 'N/A').join(', ') : 'N/A'}
+                          {order.items
+                            ? order.items
+                                .map(
+                                  (item) => item.product?.owner?.name || "N/A"
+                                )
+                                .join(", ")
+                            : "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {order.items ? order.items.map(item => item.quantity).join(', ') : 'N/A'}
+                          {order.items
+                            ? order.items
+                                .map((item) => item.quantity)
+                                .join(", ")
+                            : "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {order.items ? order.items.map(item => item.product?.name || 'N/A').join(', ') : 'N/A'}
+                          {order.items
+                            ? order.items
+                                .map((item) => item.product?.name || "N/A")
+                                .join(", ")
+                            : "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {order.items ? order.items.map(item => item.product?.category || 'N/A').join(', ') : 'N/A'}
+                          {order.items
+                            ? order.items
+                                .map((item) => item.product?.category || "N/A")
+                                .join(", ")
+                            : "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {order?.shippingAddress || 'N/A'}
+                          {order?.shippingAddress || "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {order?.totalItems || 'N/A'}
+                          {order?.status || "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {order?.totalPrice || 'N/A'}
+                          {order?.totalItems || "N/A"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {order?.totalPrice || "N/A"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Button
+                            icon={
+                              localLoading[order._id] ? (
+                                <Spinner classes={`!h-4`} />
+                              ) : order?.status === "pending" ? (
+                                <GoIssueReopened className="!text-primary font-bold " />
+                              ) : (
+                                <IoMdDoneAll className="!text-primary font-bold " />
+                              )
+                            }
+                            styles="!bg-indigo-100"
+                            click={() => {
+                              handleCompletePayment(order?._id);
+                            }}
+                          />
                         </td>
                       </tr>
                     ))}
@@ -113,4 +182,6 @@ const Orders = () => {
   );
 };
 
+
 export default Orders;
+
