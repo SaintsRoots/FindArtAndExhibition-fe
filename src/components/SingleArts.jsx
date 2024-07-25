@@ -36,9 +36,10 @@ const SingleArts = () => {
   const handleAddItemToCart = async (productId) => {
     setLocalLoading(true);
     try {
-      const resultAction = await dispatch(addItemToCart({ productId, quantity: 1 }));
+      const resultAction = await dispatch(
+        addItemToCart({ productId, quantity: 1 })
+      );
       handleResultAction(resultAction);
-
     } catch (error) {
       notifyError(error.message);
     } finally {
@@ -125,6 +126,14 @@ const SingleArts = () => {
               </div>
             </div>
             <div className="flex flex-col gap-1">
+              {single?.available_arts > 0 ? (
+                <p className="text-xs">
+                  Available{" "}
+                  <span className="font-bold">{single?.available_arts}</span>{" "}
+                </p>
+              ) : (
+                <p className="text-xs font-bold text-red-600">Sold Out</p>
+              )}
               <p>{single?.description}</p>
               <h1 className="text-xl font-semibold  ">{single?.price} frw</h1>
             </div>
@@ -160,6 +169,7 @@ const SingleArts = () => {
       .map((item, index) => (
         <ArtsCard
           key={index}
+          available={item?.available_arts}
           image={item?.image}
           name={item?.name}
           price={item?.price}

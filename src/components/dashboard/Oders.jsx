@@ -60,6 +60,9 @@ const Orders = () => {
                         Address
                       </th>
                       <th scope="col" className={thClasses}>
+                        Status
+                      </th>
+                      <th scope="col" className={thClasses}>
                         Total Items
                       </th>
                       <th scope="col" className={thClasses}>
@@ -87,6 +90,9 @@ const Orders = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           {order.shippingAddress || 'N/A'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {order?.status || 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           {order.totalItems || 'N/A'}

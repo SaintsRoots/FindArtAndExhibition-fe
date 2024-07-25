@@ -39,6 +39,7 @@ const Drawings = () => {
       .map((item, index) => (
         <ArtsCard
           key={index}
+          available={item?.available_arts}
           image={item?.image}
           name={item?.name}
           price={item?.price}

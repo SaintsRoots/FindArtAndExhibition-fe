@@ -6,7 +6,7 @@ import { addItemToCart, getCart } from "../features/cart/cartSlice";
 import { toast } from "react-toastify";
 import Spinner from "./Spinner";
 
-const ArtsCard = ({ name, price, image, money, id }) => {
+const ArtsCard = ({ name, price, image, money, id, available }) => {
   const [localLoading, setLocalLoading] = useState(false);
   const dispatch = useDispatch();
 
@@ -14,7 +14,9 @@ const ArtsCard = ({ name, price, image, money, id }) => {
     setLocalLoading(true);
     const toastId = `toast-${id}`; // Unique toast ID based on product ID
     try {
-      const resultAction = await dispatch(addItemToCart({ productId, quantity: 1 }));
+      const resultAction = await dispatch(
+        addItemToCart({ productId, quantity: 1 })
+      );
       handleResultAction(resultAction, toastId);
       dispatch(getCart());
     } catch (error) {
@@ -68,11 +70,19 @@ const ArtsCard = ({ name, price, image, money, id }) => {
       <div className="max-h-[300px] overflow-hidden">
         <img src={image} alt={name} className="aspect-square duration-100 " />
       </div>
-      <div className="flex justify-between items-start p-3 gap-2">
+      <div className="flex justify-between items-center p-3 gap-2">
         <div className="flex flex-col leading-6">
+          {available && available > 0 ? (
+            <p className="text-xs">
+              Available <span className="font-bold">{available}</span>{" "}
+            </p>
+          ) : (
+            <p className="text-xs font-bold text-red-600">Sold Out</p>
+          )}
           <h1 className="text-sm font-normal text-gray-500 text-nowrap capitalize">
             {name}
           </h1>
+
           <p className="text-sm text-slate-700 font-light capitalize">
             {price} {money}
           </p>
