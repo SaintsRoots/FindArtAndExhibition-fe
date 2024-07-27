@@ -98,7 +98,7 @@ const SingleArts = () => {
               <div className="flex items-center gap-2">
                 <div className="flex justify-end  w-10 h-10 rounded-full p-[2px]  bg-textColor1 ">
                   <img
-                    src={single?.owner?.profile}
+                    src={single?.owner?.img}
                     alt={single?.owner?.name}
                     className=" rounded-full aspect-square "
                   />
