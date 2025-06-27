@@ -1,37 +1,46 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import { FaUserTie } from "react-icons/fa";
+import { 
+  User, 
+  Lock, 
+  Mail, 
+  Image,
+  ArrowRight,
+  Loader2
+} from 'lucide-react';
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useDispatch, useSelector } from "react-redux";
 import {
   makeSignup,
   selectLoginStatus,
   selectLoginError,
 } from "../features/auth/authSlice";
-import Input from "../components/form/Input";
-import Button from "../components/form/Button";
-import { FaUser, FaLock, FaEnvelope } from "react-icons/fa";
 import * as forValidation from "../validations/Index";
-import Spinner from "../components/Spinner";
 
-function Signup() {
+const Signup = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const loading = useSelector(selectLoginStatus);
   const loginError = useSelector(selectLoginError);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [role, setRole] = useState(""); 
+  const [preview, setPreview] = useState(null);
 
   const handleFileChange = (event) => {
-    setSelectedFile(event.currentTarget.files[0]);
-    formik.setFieldValue("img", event.currentTarget.files[0]);
-  };
-
-  const handleRoleChange = (event) => {
-    setRole(event.target.value); 
-    formik.handleChange(event);
+    const file = event.target.files[0];
+    setSelectedFile(file);
+    formik.setFieldValue("img", file);
+    
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreview(null);
+    }
   };
 
   const formik = useFormik({
@@ -52,6 +61,7 @@ function Signup() {
       if (selectedFile) {
         formData.append("img", selectedFile);
       }
+
       const resultAction = await dispatch(
         makeSignup({
           name: values.name,
@@ -61,179 +71,223 @@ function Signup() {
           role: values.role,
         })
       );
+
       if (makeSignup.fulfilled.match(resultAction)) {
         formik.resetForm();
-        notify();
-        // set timeout
-        setTimeout(() => {
-          navigate("/login");
-        }, 3000);
-      } else {
-        if (resultAction.payload) {
-          console.log("Signup Error:", resultAction.payload);
-          formik.resetForm();
-        } else {
-          console.log("Signup Error:", resultAction.error);
-          formik.resetForm();
-        }
+        toast.success("Registration successful!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+        setTimeout(() => navigate("/login"), 3000);
       }
     },
   });
 
-  const notify = () => {
-    toast.success("Application Successfully!", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-    });
-  };
-
   return (
-    <div className="bg-secondary w-full min-h-screen mt-12 flex flex-col justify-center items-center">
-      <div className="w-full flex flex-col justify-center items-center">
-        <div className="bg-white w-full md:w-1/2 h-620 rounded-sm flex justify-center items-center py-10 shadow-md">
-          <form
-            className="w-[95%] md:w-[85%] h-full flex flex-col justify-center items-center"
-            onSubmit={formik.handleSubmit}
-          >
-            <h2 className="text-2xl lx:text-4xl font-extrabold text-primary">
-              Online Art Finder and exhibition
-            </h2>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl">
+        {/* Signup Card */}
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          {/* Card Header */}
+          <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4">
+              <User className="w-10 h-10 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Join Our Community</h2>
+            <p className="text-purple-100 mt-1">Create your account to get started</p>
+          </div>
+
+          {/* Card Body */}
+          <div className="p-6">
             {loginError && (
-              <div className="text-sm text-red-800 font-normal mt-2">
+              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
                 {loginError.message ? loginError.message : loginError}
               </div>
             )}
-            <div className="flex items-center gap-2 w-full">
-              <div className="mt-6 mdl:mt-[34px] w-full">
-                <Input
-                  type="input"
-                  label="Username"
-                  placeholder="Username"
-                  id="name"
-                  icon={<FaUser />}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  values={formik.values.name}
-                />
-                {formik.touched.name && formik.errors.name && (
-                  <p className="text-sm text-red-800 font-normal">
-                    {formik.errors.name}
-                  </p>
-                )}
-              </div>
-              <div className="mt-6 mdl:mt-[34px] w-full">
-                <Input
-                  type="input"
-                  placeholder="Email"
-                  label="Email"
-                  id="email"
-                  icon={<FaEnvelope />}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  values={formik.values.email}
-                />
-                {formik.touched.email && formik.errors.email && (
-                  <p className="text-sm text-red-800 font-normal">
-                    {formik.errors.email}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="mt-6 mdl:mt-[34px] w-full flex flex-col gap-2 ">
-              <h1 className="text-sm font-medium">User Type</h1>
-              <div
-                className={`relative text-primary  duration-100 outline-none justify-between flex items-center gap-6 p-3  w-full rounded-md font-semibold border-2 hover:border-primary`}
-              >
-                <FaUserTie />
-                <select
-                  className="w-full border-0 outline-none"
-                  id="role"
-                  icon={<FaLock />}
-                  onChange={handleRoleChange} // Updated to handleRoleChange
-                  onBlur={formik.handleBlur}
-                  value={formik.values.role} // Updated to value
-                >
-                  <option>Choose Your Role</option>
-                  <option value="Artist">Artist</option>
-                  <option value="User">Customer</option>
-                </select>
-              </div>
-              {formik.touched.role && formik.errors.role && (
-                <p className="text-sm text-red-800 font-normal">
-                  {formik.errors.role}
-                </p>
-              )}
-            </div>
-            {role === "Artist" && ( 
-              <div className="w-full">
-                <label htmlFor="img">Add Image</label>
-                <div className="w-full h-16 relative border border-dashed border-blue-800 rounded-md">
-                  <Input
-                    type="input"
-                    inputType="file"
-                    id="img"
-                    style={`!absolute !w-full !h-full !top-0 !left-0 `}
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    onBlur={formik.handleBlur}
-                  />
+
+            <form onSubmit={formik.handleSubmit} className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Username Field */}
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Username
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <User className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      id="name"
+                      name="name"
+                      type="text"
+                      placeholder="Your username"
+                      className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.name}
+                    />
+                  </div>
+                  {formik.touched.name && formik.errors.name && (
+                    <p className="mt-1 text-sm text-red-600">{formik.errors.name}</p>
+                  )}
+                </div>
+
+                {/* Email Field */}
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="your@email.com"
+                      className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.email}
+                    />
+                  </div>
+                  {formik.touched.email && formik.errors.email && (
+                    <p className="mt-1 text-sm text-red-600">{formik.errors.email}</p>
+                  )}
                 </div>
               </div>
-            )}
-            <div className="mt-6 mdl:mt-[34px] w-full">
-              <Input
-                type="input"
-                label="Password"
-                inputType="password"
-                placeholder="Password"
-                id="password"
-                icon={<FaLock />}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                values={formik.values.password}
-              />
-              {formik.touched.password && formik.errors.password && (
-                <p className="text-sm text-red-800 font-normal">
-                  {formik.errors.password}
-                </p>
-              )}
-            </div>
-            <Button
-              click={formik.submitForm}
-              title={
-                loading ? (
-                  <Spinner classes={` !text-white !h-6 !w-6`} />
-                ) : (
-                  "Signup"
-                )
-              }
-              styles="w-full !scale-100 mt-6 mdl:mt-12 bg-primary text-white"
-            />
-            <div className="mt-6 flex flex-col md:flex-row gap-2 justify-between">
-              <Link
-                to="/forgot-password"
-                className="hover:underline text-[#3558D4]"
-              >
-                Forgot password?
-              </Link>
+
+              {/* Role Selection */}
               <div>
-                If you have an account, Login{" "}
-                <Link to="/login" className="hover:underline text-[#3558D4]">
-                  here
-                </Link>
+                <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                  I want to join as
+                </label>
+                <div className="relative">
+                  <select
+                    id="role"
+                    name="role"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    value={formik.values.role}
+                  >
+                    <option value="">Select your role</option>
+                    <option value="Artist">Artist</option>
+                    <option value="User">Art Enthusiast</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <User className="h-5 w-5 text-gray-400" />
+                  </div>
+                </div>
+                {formik.touched.role && formik.errors.role && (
+                  <p className="mt-1 text-sm text-red-600">{formik.errors.role}</p>
+                )}
               </div>
+
+              {/* Profile Image Upload (Conditional) */}
+              {formik.values.role === "Artist" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Profile Image
+                  </label>
+                  <div className="flex items-center gap-4">
+                    {preview ? (
+                      <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-purple-200">
+                        <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                        <Image className="w-6 h-6 text-gray-400" />
+                      </div>
+                    )}
+                    <label className="flex-1">
+                      <div className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer text-center">
+                        <span className="text-sm font-medium text-gray-700">Choose file</span>
+                        <input
+                          type="file"
+                          id="img"
+                          name="img"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          onBlur={formik.handleBlur}
+                        />
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Password Field */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    value={formik.values.password}
+                  />
+                </div>
+                {formik.touched.password && formik.errors.password && (
+                  <p className="mt-1 text-sm text-red-600">{formik.errors.password}</p>
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-500 hover:to-pink-500 transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <span>Create Account</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Login Link */}
+            <div className="mt-6 text-center text-sm">
+              <p className="text-gray-600">
+                Already have an account?{' '}
+                <Link to="/login" className="font-medium text-purple-600 hover:text-purple-500">
+                  Sign in here
+                </Link>
+              </p>
             </div>
-          </form>
+          </div>
+        </div>
+
+        {/* App Info */}
+        <div className="mt-6 text-center">
+          <p className="text-xs text-gray-500">
+            Online Art Finder and Exhibition Platform
+          </p>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Signup;

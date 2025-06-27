@@ -1,4 +1,3 @@
-import React from 'react';
 import { adminNav } from '../components/JsonData/adminNav';
 import Layout from '../layouts/Layout';
 
