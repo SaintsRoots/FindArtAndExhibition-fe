@@ -35,7 +35,7 @@ const ArtistCard = ({ id, name, imgSrc, email, status, role, createdAt }) => {
         <img
           src={imgSrc || defaultImage}
           alt={name}
-          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full object-cover group-hover:scale-110 transition-transform duration-500"
           onError={(e) => {
             e.target.src = defaultImage;
           }}
@@ -102,9 +102,9 @@ const ArtistCard = ({ id, name, imgSrc, email, status, role, createdAt }) => {
             <div className="font-semibold text-gray-900">{followers}</div>
             <div>Followers</div>
           </div>
-          <div className="text-center flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
-            <div className="text-xs">{formatDate(createdAt)}</div>
+          <div className="text-center flex flex-col items-center gap-1">
+            <Calendar className="w-4 h-4 font-semibold text-gray-900" />
+            <div className="text-sm">{formatDate(createdAt)}</div>
           </div>
         </div>
 

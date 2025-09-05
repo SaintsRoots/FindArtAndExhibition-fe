@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
   Heart, 
-  Star, 
-  MessageCircle, 
   TrendingUp, 
   Users, 
   Palette, 
@@ -13,6 +11,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import OverviewSection from '../components/OverviewSection';
+import ArtistPage from './AtistPage';
 
 const Home = () => {
   const [featuredIndex, setFeaturedIndex] = useState(0);
@@ -61,41 +60,7 @@ const Home = () => {
     }
   ];
 
-  const artists = [
-    {
-      id: 1,
-      name: "Sarah Chen",
-      specialty: "Abstract & Contemporary",
-      avatar: "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=800&h=600&fit=crop",
-      followers: 2340,
-      artworks: 45,
-      rating: 4.9,
-      isVerified: true,
-      isOnline: true
-    },
-    {
-      id: 2,
-      name: "Marcus Rodriguez",
-      specialty: "Street Art & Murals",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      followers: 1890,
-      artworks: 32,
-      rating: 4.8,
-      isVerified: true,
-      isOnline: false
-    },
-    {
-      id: 3,
-      name: "Emma Thompson",
-      specialty: "Landscape & Nature",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-      followers: 3120,
-      artworks: 67,
-      rating: 4.9,
-      isVerified: true,
-      isOnline: true
-    }
-  ];
+
 
   const stats = [
     { label: "Active Artists", value: "2,500+", icon: Users },
@@ -257,63 +222,7 @@ const Home = () => {
             Connect directly with talented artists and discover their unique stories
           </p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {artists.map((artist) => (
-            <div key={artist.id} className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="text-center">
-                <div className="relative inline-block mb-4">
-                  <img
-                    src={artist.avatar}
-                    alt={artist.name}
-                    className="w-24 h-24 rounded-full mx-auto object-cover"
-                  />
-                  {artist.isOnline && (
-                    <div className="absolute bottom-2 right-2 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                      <MessageCircle className="w-3 h-3 text-white" />
-                    </div>
-                  )}
-                  {artist.isVerified && (
-                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs">✓</span>
-                    </div>
-                  )}
-                </div>
-                
-                <h3 className="text-xl font-bold text-gray-900 mb-1">{artist.name}</h3>
-                <p className="text-gray-600 mb-3">{artist.specialty}</p>
-                
-                <div className="flex items-center justify-center gap-4 text-sm text-gray-500 mb-4">
-                  <span>{artist.artworks} artworks</span>
-                  <span>•</span>
-                  <span>{artist.followers} followers</span>
-                </div>
-                
-                <div className="flex items-center justify-center gap-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-4 h-4 ${
-                        i < Math.floor(artist.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
-                  <span className="text-sm text-gray-600 ml-2">{artist.rating}</span>
-                </div>
-                
-                <div className="flex gap-2">
-                  <button className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                    View Profile
-                  </button>
-                  <button className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
-                    <MessageCircle className="w-4 h-4" />
-                    Chat
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ArtistPage />
         
         <div className="text-center mt-12">
           <button className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-500 hover:to-pink-500 transition-all duration-300 transform hover:scale-105">
