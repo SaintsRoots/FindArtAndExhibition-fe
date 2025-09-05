@@ -11,7 +11,8 @@
 img {
   display: block;
   width: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  aspect-ratio: 1 / 1;
 }
 .bg {
   background: url("./assets/bg-3.jpg");
