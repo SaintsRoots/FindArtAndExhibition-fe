@@ -8,14 +8,16 @@ import { navLink } from "./JsonData/NavBar";
 import { useSelector, useDispatch } from "react-redux";
 import { getIsAuthenticated, logout } from "../features/auth/authSlice";
 import { selectAllcart } from "../features/cart/cartSlice";
-
+import { selectUnreadCount } from "../features/chats/chartSlice"; 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const isAuthenticated = useSelector(getIsAuthenticated);
-  const allCart = useSelector(selectAllcart);
   const dispatch = useDispatch();
+  const unreadCount = useSelector(selectUnreadCount);
+  const allCart = useSelector(selectAllcart);
+  
 
 
   const name = localStorage.getItem("name");
@@ -93,12 +95,14 @@ const NavBar = () => {
                 {isAuthenticated ? (
               <>
                 {/* Wishlist */}
-                <button className="p-2 bg-slate-100 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-300 relative">
+                <Link to="/chats" className="p-2 bg-slate-100 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-300 relative">
                   <RiTelegram2Line  className="w-5 h-5" />
                   <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    3
+                    {unreadCount  && unreadCount}
                   </div>
-                </button>
+                </Link>
+
+                
 
                 {/* Cart */}
                 <Link to="/cart" className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-300 relative">
