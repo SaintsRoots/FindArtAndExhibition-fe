@@ -5,6 +5,7 @@ import artistReducer from "./features/artist/artistSlice";
 import cartReducer from "./features/cart/cartSlice";
 import ordersReducers from "./features/orders/ordersSlice";
 import contactReducers from "./features/contact/contactSlice";
+import chatReducers from "./features/chats/chartSlice";
 
 const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
         cart: cartReducer,
         orders: ordersReducers,
         contact: contactReducers,
+        chat: chatReducers,
     },
 });
 

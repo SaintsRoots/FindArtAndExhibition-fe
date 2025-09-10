@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -29,6 +28,7 @@ import Orders from "../components/admin/Orders";
 import ManageArts from "../components/admin/ManageArts";
 import ManageArtist from "../components/admin/ManageArtist";
 import ManageCustomer from "../components/admin/ManageCustomer";
+import Chat from "../components/Chat";
 
 
 
@@ -60,6 +60,7 @@ const AppRoutes = () => {
           <Route path="/:name" element={<SingleArts />} />
           <Route path="/blog/:name" element={<SingleBlog />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/chats" element={<Chat />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 
