@@ -80,6 +80,7 @@ const AppRoutes = () => {
           <Route path="manage-artworks" element={<ManageArts />} />
           <Route path="manage-artists" element={<ManageArtist />} />
           <Route path="manage-customers" element={<ManageCustomer />} />
+          <Route path="Chats" element={<Chat />} />
 
 
         </Route>
@@ -95,6 +96,7 @@ const AppRoutes = () => {
           <Route index element={<Dashboard />} />
           <Route path="manage-artworks" element={<ManageArt />} />
           <Route path="orders" element={<Oders />} />
+          <Route path="Chats" element={<Chat />} />
           <Route path="profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Route>

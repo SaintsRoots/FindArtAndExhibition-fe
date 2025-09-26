@@ -1,4 +1,3 @@
-import React from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import TopNav from "../components/TopNav";
 import { useDispatch } from "react-redux";
@@ -8,42 +7,53 @@ const Layout = ({ navItems, topNavProps }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // handle logout
   const handleLogout = () => {
     dispatch(logout());
     navigate("/login"); 
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <TopNav {...topNavProps} />
-      <div className="py-3 bg-white flex h-auto">
-        <div className="bg-white px-4 py-2 lg:w-52 h-full fixed mt-12 shadow-lg hidden lg:flex lg:flex-col">
-          <ul className="mt-3 flex flex-col">
-            {navItems.map((link, index) => (
-              <li key={index} className="hover:bg-slate-100 px-2 py-2">
-                <NavLink
-                  to={link.path}
-                  className={({ isActive }) =>
-                    isActive
-                      ? "text-sm font-semibold leading-7 text-primary flex gap-3 items-center"
-                      : "text-xs font-medium leading-7 text-black hover:text-primary flex gap-3 items-center"
-                  }
-                  onClick={() => {
-                    if (link.path === "Logout") {
-                      handleLogout();
-                    };
-                  }}
-                >
-                  <div className="text-primary">{link.icon}</div>
-                  <span className="text-nowrap">{link.name}</span>
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+      <div className="flex h-screen pt-16">
+        {/* Sidebar */}
+        <div className="bg-white w-64 border-r border-gray-200 fixed h-full hidden lg:flex flex-col">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-xl font-bold text-gray-800">Artist Dashboard</h2>
+          </div>
+          <nav className="flex-1 p-4">
+            <ul className="space-y-2">
+              {navItems.map((link, index) => (
+                <li key={index}>
+                  <NavLink
+                    to={link.path}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                        isActive
+                          ? "bg-purple-50 text-purple-700 border-l-4 border-purple-600"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      }`
+                    }
+                    onClick={() => {
+                      if (link.name === "Logout") {
+                        handleLogout();
+                      }
+                    }}
+                  >
+                    <div className="text-lg">{link.icon}</div>
+                    <span className="font-medium">{link.name}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
-        <div className="w-screen lg:ml-52 mt-14 px-2 py-2">
-          <Outlet />
+
+        {/* Main Content */}
+        <div className="flex-1 lg:ml-64 transition-all duration-300">
+          <div className="p-6">
+            <Outlet />
+          </div>
         </div>
       </div>
     </div>

@@ -130,6 +130,11 @@ export const logout = createAsyncThunk(
       localStorage.removeItem("isAdmin");
       localStorage.removeItem("role");
       localStorage.removeItem("status");
+      localStorage.removeItem("identity");
+      // router.push(/);
+
+      window.location.href = "/";
+
       return true;
     } catch (error) {
       return rejectWithValue("Failed to logout.");
