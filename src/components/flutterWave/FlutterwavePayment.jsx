@@ -1,4 +1,3 @@
-import React from "react";
 import { useFlutterwave, closePaymentModal } from "flutterwave-react-v3";
 
 const FlutterwavePayment = ({ amount, email, phone, name }) => {
@@ -6,7 +5,7 @@ const FlutterwavePayment = ({ amount, email, phone, name }) => {
     public_key: process.env.REACT_APP_PUBLIC_KEY,
     tx_ref: Date.now(),
     amount: amount,
-    currency: "NGN",
+    currency: "FRW",
     payment_options: "card,mobilemoney,ussd",
     customer: {
       email: email,
