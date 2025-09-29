@@ -122,7 +122,7 @@ const Orders = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="font-semibold text-gray-900">
-                        {order.totalPrice ? `₣${order.totalPrice}` : 'N/A'}
+                        {order.totalPrice ? `${order.totalPrice}` : 'N/A'} Frw
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
