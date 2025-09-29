@@ -9,7 +9,6 @@ import {
   Mail, 
   ArrowRight,
   ShoppingBag,
-
 } from "lucide-react";
 import CartCard from "../components/CartCard";
 import Modal from "../components/CartModel";
@@ -39,6 +38,8 @@ const Cart = () => {
 
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProceedingToPayment, setIsProceedingToPayment] = useState(false);
+  const [orderCompleted, setOrderCompleted] = useState(false);
 
   const handleRemoveItem = async (productId) => {
     try {
@@ -71,17 +72,54 @@ const Cart = () => {
             shippingAddress: values.shippingAddress,
           })
         ).unwrap();
+        
+        // Show success notification
+        notifySuccess(`Successfully ordered ${totalItems} items. Redirecting to payment...`);
+        
+        // Set order completed flag
+        setOrderCompleted(true);
         setLoading(false);
-        notifySuccess(`Successfully ordered ${totalItems} items`);
-        setIsModalOpen(true);
+        
+        // Wait 3 seconds before proceeding to payment
+        setIsProceedingToPayment(true);
+        // await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        // After delay, trigger Flutterwave payment
+        // This will be handled by the FlutterwavePayment component
+        setIsProceedingToPayment(false);
+        
+        // Refresh cart
         await dispatch(getCart());
         formik.resetForm();
+        
       } catch (error) {
         setLoading(false);
+        setOrderCompleted(false);
         notifyError(error.message);
       }
     },
   });
+
+  // Function to handle payment initiation
+  const handlePaymentClick = async (e) => {
+    if (!orderCompleted) {
+      e.preventDefault();
+      
+      // Validate form first
+      const errors = await formik.validateForm();
+      if (Object.keys(errors).length > 0) {
+        formik.setTouched({
+          shippingAddress: true,
+        });
+        // notifyError("Please fill in all required fields");
+        return;
+      }
+      
+      // Submit form to create order
+      await formik.handleSubmit();
+    }
+    // If order is completed, allow Flutterwave to proceed
+  };
 
   const EmptyCartSection = () => (
     <div className="text-center py-16">
@@ -107,7 +145,6 @@ const Cart = () => {
 
   const HeroSection = () => (
     <section className="relative py-12 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
-      {/* Background Animation */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-10 left-10 w-48 h-48 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
         <div className="absolute top-20 right-10 w-64 h-64 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000"></div>
@@ -258,18 +295,22 @@ const Cart = () => {
 
                   {/* Payment Button */}
                   <div className="pt-4">
-                    {loading ? (
-                      <div className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl flex items-center justify-center">
+                    {loading || isProceedingToPayment ? (
+                      <div className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl flex items-center justify-center gap-2">
                         <Spinner classes="!h-6 !w-6 !text-white" />
+                        <span>
+                          {isProceedingToPayment ? "Redirecting to payment..." : "Processing..."}
+                        </span>
                       </div>
                     ) : (
-                      <div className="w-full text-white bg-black rounded-md relative">
+                      <div className="w-full text-white bg-black rounded-md relative" onClick={handlePaymentClick}>
                         <FlutterwavePayment
                           amount={totalPrice}
                           email={email}
                           phone={phone}
                           name={name}
-                          className="w-full absolute z-10 left-0 top-0  py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-500 hover:to-pink-500 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+                          disabled={!orderCompleted}
+                          className="w-full absolute z-10 left-0 top-0 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-500 hover:to-pink-500 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </div>
                     )}
