@@ -1,17 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  Send,
-  MessageCircle,
-  Paperclip,
-  X,
-  FileText,
-} from "lucide-react";
+import { Send, MessageCircle, Paperclip, X, FileText } from "lucide-react";
 import { FaLocationDot } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserConversations,
   getMessagesBetweenUsers,
-  sendMessage,
+  sendMessage as sendMessageAPI,
   getUnreadCount,
   getAllArtists,
   getOrCreateConversation,
@@ -20,93 +14,335 @@ import {
   selectArtists,
   selectChatLoading,
   selectUnreadCount,
-  // selectChatError,
-  // selectCurrentConversation,
 } from "../features/chats/chartSlice";
+import { useSocket } from "../context/SocketContext";
 
 const Chat = () => {
   const [activeConversation, setActiveConversation] = useState(null);
   const [newMessage, setNewMessage] = useState("");
   const [activeTab, setActiveTab] = useState("messages");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [localMessages, setLocalMessages] = useState([]);
+  const [localConversations, setLocalConversations] = useState([]);
+  const [localArtists, setLocalArtists] = useState([]);
+  const [localUnreadCount, setLocalUnreadCount] = useState(0);
+
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const socketRef = useRef(null);
 
   const userId = localStorage.getItem("identity");
+  const userName = localStorage.getItem("name");
+  const userProfile = localStorage.getItem("profile");
   const dispatch = useDispatch();
-  const conversations = useSelector(selectConversations);
-  const messages = useSelector(selectMessages);
-  const artists = useSelector(selectArtists);
-  const loading = useSelector(selectChatLoading);
-  const unreadCount = useSelector(selectUnreadCount);
-  // const error = useSelector(selectChatError);
-  // const currentConversation = useSelector(selectCurrentConversation);
 
+  const reduxConversations = useSelector(selectConversations);
+  const reduxMessages = useSelector(selectMessages);
+  const reduxArtists = useSelector(selectArtists);
+  const loading = useSelector(selectChatLoading);
+  const reduxUnreadCount = useSelector(selectUnreadCount);
+
+  const {
+    socket,
+    isConnected,
+    conversations: socketConversations,
+    unreadCount: socketUnreadCount,
+    onlineUsers,
+    currentMessages,
+    typingUsers,
+    sendMessage: socketSendMessage,
+    startTyping: socketStartTyping,
+    stopTyping: socketStopTyping,
+    markMessageAsRead,
+    setCurrentConversation: setSocketCurrentConversation,
+  } = useSocket();
+
+  // Initialize socket reference
+  useEffect(() => {
+    socketRef.current = socket;
+  }, [socket]);
+
+  // Use real-time data when available, fallback to Redux data
+  const displayConversations =
+    socketConversations.length > 0
+      ? socketConversations
+      : localConversations.length > 0
+      ? localConversations
+      : reduxConversations;
+
+  const displayUnreadCount =
+    socketUnreadCount > 0
+      ? socketUnreadCount
+      : localUnreadCount > 0
+      ? localUnreadCount
+      : reduxUnreadCount;
+
+  const displayArtists = localArtists.length > 0 ? localArtists : reduxArtists;
+
+  // Load initial data and set up socket listeners
   useEffect(() => {
     if (userId) {
+      // Load initial data via Redux as fallback
       dispatch(getUserConversations(userId));
       dispatch(getUnreadCount(userId));
       dispatch(getAllArtists());
-    }
-  }, [dispatch, userId]);
 
+      // Set up socket listeners if socket is available
+      if (socket && isConnected) {
+        setupSocketListeners();
+
+        // Request real-time data
+        socket.emit("conversations:load");
+        socket.emit("unread:count");
+        socket.emit("artists:load");
+      }
+    }
+
+    return () => {
+      // Clean up socket listeners
+      if (socketRef.current) {
+        socketRef.current.off("conversations:loaded");
+        socketRef.current.off("messages:loaded");
+        socketRef.current.off("artists:loaded");
+        socketRef.current.off("unread:count");
+        socketRef.current.off("conversation:created");
+        socketRef.current.off("conversations:updated");
+      }
+    };
+  }, [dispatch, userId, socket, isConnected]);
+
+  // Set up socket event listeners
+  const setupSocketListeners = () => {
+    if (!socket) return;
+
+    socket.on("conversations:loaded", (conversations) => {
+      setLocalConversations(conversations);
+    });
+
+    socket.on("messages:loaded", (data) => {
+      if (activeConversation) {
+        const otherUser = activeConversation.participants.find(
+          (p) => p._id !== userId
+        );
+        if (otherUser && data.otherUserId === otherUser._id) {
+          setLocalMessages(data.messages);
+        }
+      }
+    });
+
+    socket.on("artists:loaded", (artists) => {
+      setLocalArtists(artists);
+    });
+
+    socket.on("unread:count", (count) => {
+      setLocalUnreadCount(count);
+    });
+
+    socket.on("conversation:created", (conversation) => {
+      setActiveConversation(conversation);
+      setActiveTab("messages");
+      const otherUser = conversation.participants.find((p) => p._id !== userId);
+      if (otherUser) {
+        setSocketCurrentConversation(otherUser._id);
+        // Load messages for the new conversation
+        socket.emit("messages:load", { otherUserId: otherUser._id });
+      }
+    });
+
+    socket.on("conversations:updated", (conversations) => {
+      setLocalConversations(conversations);
+    });
+  };
+
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [reduxMessages, currentMessages, localMessages]);
+
+  // Set current conversation and load messages when active conversation changes
+  useEffect(() => {
+    if (activeConversation && userId) {
+      const otherUser = activeConversation.participants.find(
+        (p) => p._id !== userId
+      );
+      if (otherUser) {
+        setSocketCurrentConversation(otherUser._id);
+
+        // Load messages via socket if connected, otherwise use Redux
+        if (socket && isConnected) {
+          socket.emit("messages:load", { otherUserId: otherUser._id });
+        } else {
+          dispatch(
+            getMessagesBetweenUsers({ userId, otherUserId: otherUser._id })
+          );
+        }
+
+        // Mark messages as read when opening conversation
+        const messagesToMark =
+          localMessages.length > 0 ? localMessages : reduxMessages;
+        messagesToMark.forEach((message) => {
+          if (message.sender._id !== userId && !message.isRead) {
+            markMessageAsRead(message._id, message.sender._id);
+          }
+        });
+      }
+    }
+  }, [
+    activeConversation,
+    userId,
+    socket,
+    isConnected,
+    dispatch,
+    setSocketCurrentConversation,
+    markMessageAsRead,
+  ]);
+
+  // Handle typing indicators
+  useEffect(() => {
+    if (activeConversation) {
+      const otherUser = activeConversation.participants.find(
+        (p) => p._id !== userId
+      );
+      if (otherUser && typingUsers.has(otherUser._id)) {
+        setIsTyping(true);
+
+        // Clear existing timeout
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+
+        // Auto-clear typing after 3 seconds
+        typingTimeoutRef.current = setTimeout(() => {
+          setIsTyping(false);
+        }, 3000);
+      } else {
+        setIsTyping(false);
+      }
+    }
+  }, [typingUsers, activeConversation, userId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleLoadMessages = (otherUserId) => {
-    dispatch(getMessagesBetweenUsers({ userId, otherUserId }));
+    if (socket && isConnected) {
+      socket.emit("messages:load", { otherUserId });
+    } else {
+      dispatch(getMessagesBetweenUsers({ userId, otherUserId }));
+    }
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!activeConversation) return;
+    if ((!newMessage.trim() && !selectedFile) || !activeConversation) return;
 
     const otherUser = activeConversation.participants.find(
       (p) => p._id !== userId
     );
-    const messageData = {
-      sender: userId,
-      receiver: otherUser._id,
-      content: newMessage.trim(),
-      messageType: selectedFile
-        ? selectedFile.type.startsWith("image/")
-          ? "image"
-          : "file"
-        : "text",
-      fileUrl: selectedFile || null,
-    };
+    if (!otherUser) return;
+
+    // Stop typing indicator
+    socketStopTyping(otherUser._id);
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
 
     try {
-      await dispatch(sendMessage(messageData)).unwrap();
+      // Use socket for real-time messaging (preferred)
+      if (isConnected && socket) {
+        socketSendMessage(
+          otherUser._id,
+          newMessage.trim(),
+          selectedFile ? "file" : "text"
+        );
+
+        // Optimistically add message to local state
+        const optimisticMessage = {
+          _id: Date.now().toString(), // Temporary ID
+          senderId: userId,
+          senderName: userName,
+          senderImg: userProfile,
+          receiverId: otherUser._id,
+          content: newMessage.trim(),
+          messageType: selectedFile ? "file" : "text",
+          timestamp: new Date(),
+          isRead: false,
+          isOptimistic: true, // Flag to identify optimistic messages
+        };
+
+        setLocalMessages((prev) => [...prev, optimisticMessage]);
+      } else {
+        // Fallback to API
+        const messageData = {
+          sender: userId,
+          receiver: otherUser._id,
+          content: newMessage.trim(),
+          messageType: selectedFile
+            ? selectedFile.type.startsWith("image/")
+              ? "image"
+              : "file"
+            : "text",
+          fileUrl: selectedFile || null,
+        };
+
+        await dispatch(sendMessageAPI(messageData)).unwrap();
+        dispatch(getUserConversations(userId));
+      }
+
       setNewMessage("");
       setSelectedFile(null);
-      dispatch(getUserConversations(userId));
     } catch (error) {
       console.error("Error sending message:", error);
+      // Remove optimistic message if there was an error
+      setLocalMessages((prev) => prev.filter((msg) => !msg.isOptimistic));
     }
+  };
+
+  const handleTyping = () => {
+    if (!activeConversation || !isConnected) return;
+
+    const otherUser = activeConversation.participants.find(
+      (p) => p._id !== userId
+    );
+    if (!otherUser) return;
+
+    // Start typing
+    socketStartTyping(otherUser._id);
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Set timeout to stop typing
+    typingTimeoutRef.current = setTimeout(() => {
+      socketStopTyping(otherUser._id);
+    }, 3000);
   };
 
   const startNewConversation = async (artist) => {
     try {
-      const result = await dispatch(
-        getOrCreateConversation({
-          userId1: userId,
-          userId2: artist._id,
-        })
-      ).unwrap();
-      setActiveConversation(result);
-      setActiveTab("messages");
-      dispatch(
-        getMessagesBetweenUsers({
-          userId,
-          otherUserId: artist._id,
-        })
-      );
+      if (socket && isConnected) {
+        // Use socket to create conversation in real-time
+        socket.emit("conversation:create", { otherUserId: artist._id });
+      } else {
+        // Fallback to Redux
+        const result = await dispatch(
+          getOrCreateConversation({
+            userId1: userId,
+            userId2: artist._id,
+          })
+        ).unwrap();
+
+        setActiveConversation(result);
+        setActiveTab("messages");
+        setSocketCurrentConversation(artist._id);
+        handleLoadMessages(artist._id);
+      }
     } catch (error) {
       console.error("Error starting conversation:", error);
     }
@@ -115,7 +351,10 @@ const Chat = () => {
   const handleSelectConversation = (conversation) => {
     setActiveConversation(conversation);
     const otherUser = conversation.participants.find((p) => p._id !== userId);
-    handleLoadMessages(otherUser._id);
+    if (otherUser) {
+      setSocketCurrentConversation(otherUser._id);
+      handleLoadMessages(otherUser._id);
+    }
     setActiveTab("messages");
   };
 
@@ -155,7 +394,89 @@ const Chat = () => {
     }
   };
 
-  if (loading && !conversations.length) {
+  // Combine all message sources for display
+  const getDisplayMessages = () => {
+    if (!activeConversation) return [];
+
+    const otherUser = activeConversation.participants.find(
+      (p) => p._id !== userId
+    );
+    if (!otherUser) return [];
+
+    // Get messages from all sources
+    const apiMessages = reduxMessages || [];
+    const socketMessages = currentMessages || [];
+    const localMessagesList = localMessages || [];
+
+    // Create a map to avoid duplicates (using ID as key)
+    const messageMap = new Map();
+
+    // Add API messages first
+    apiMessages.forEach((msg) => {
+      if (msg._id) {
+        messageMap.set(msg._id, {
+          ...msg,
+          senderId: msg.sender?._id,
+          timestamp: msg.createdAt,
+        });
+      }
+    });
+
+    // Add socket messages (override with latest)
+    socketMessages.forEach((msg) => {
+      if (
+        msg._id &&
+        (msg.senderId === otherUser._id ||
+          (msg.senderId === userId && msg.receiverId === otherUser._id))
+      ) {
+        messageMap.set(msg._id, {
+          ...msg,
+          sender:
+            msg.senderId === userId
+              ? { _id: userId, name: userName, img: userProfile }
+              : {
+                  _id: otherUser._id,
+                  name: otherUser.name,
+                  img: otherUser.img,
+                },
+          createdAt: msg.timestamp,
+        });
+      }
+    });
+
+    // Add local messages (including optimistic ones)
+    localMessagesList.forEach((msg) => {
+      if (
+        msg._id &&
+        (msg.senderId === otherUser._id ||
+          (msg.senderId === userId && msg.receiverId === otherUser._id))
+      ) {
+        messageMap.set(msg._id, {
+          ...msg,
+          sender:
+            msg.senderId === userId
+              ? { _id: userId, name: userName, img: userProfile }
+              : {
+                  _id: otherUser._id,
+                  name: otherUser.name,
+                  img: otherUser.img,
+                },
+          createdAt: msg.timestamp,
+        });
+      }
+    });
+
+    // Convert to array and sort by timestamp
+    return Array.from(messageMap.values()).sort(
+      (a, b) =>
+        new Date(a.createdAt || a.timestamp) -
+        new Date(b.createdAt || b.timestamp)
+    );
+  };
+
+  const displayMessages = getDisplayMessages();
+
+  if (loading && !displayConversations.length) {
     return (
       <div className="flex h-screen bg-gray-100 items-center justify-center">
         <div className="text-center">Loading conversations...</div>
@@ -165,11 +486,13 @@ const Chat = () => {
 
   return (
     <div className="container px-10 p-5 mx-auto">
-      <div className="flex h-screen mt-32 container mx-auto p-3  bg-gray-100 shadow-md rounded-lg">
+      <div className="flex h-screen mt-32 container mx-auto p-3 bg-gray-100 shadow-md rounded-lg">
         {/* Sidebar */}
         <div className="w-1/3 bg-white border-r border-gray-200">
           <div className="p-4 border-b border-gray-200">
-            <h2 className="text-xl font-semibold mb-3">Chat</h2>
+            <h2 className="text-xl font-semibold mb-3">
+              Chat {isConnected ? "🟢" : "🔴"}
+            </h2>
             <div className="flex space-x-2">
               <button
                 onClick={() => setActiveTab("messages")}
@@ -181,9 +504,9 @@ const Chat = () => {
               >
                 <span className="relative">
                   Messages{" "}
-                  {unreadCount > 0 && (
+                  {displayUnreadCount > 0 && (
                     <span className="-ml-2 absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                      {unreadCount}
+                      {displayUnreadCount}
                     </span>
                   )}
                 </span>
@@ -204,15 +527,17 @@ const Chat = () => {
           <div className="overflow-y-auto h-[calc(100vh-140px)]">
             {activeTab === "messages" ? (
               <div>
-                {conversations.length === 0 ? (
+                {displayConversations.length === 0 ? (
                   <div className="p-4 text-center text-gray-500">
                     No conversations yet. Start by messaging an artist!
                   </div>
                 ) : (
-                  conversations.map((conversation) => {
+                  displayConversations.map((conversation) => {
                     const otherUser = conversation.participants.find(
                       (p) => p._id !== userId
                     );
+                    const isOnline = onlineUsers.includes(otherUser._id);
+
                     return (
                       <div
                         key={conversation._id}
@@ -224,30 +549,45 @@ const Chat = () => {
                         }`}
                       >
                         <div className="flex items-center">
-                          <img
-                            src={otherUser.img}
-                            alt={otherUser.name}
-                            className="w-12 h-12 rounded-full mr-3 object-cover"
-                            onError={(e) =>
-                              (e.target.src = "/fallback-avatar.png")
-                            }
-                          />
+                          <div className="relative">
+                            <img
+                              src={otherUser.img}
+                              alt={otherUser.name}
+                              className="w-12 h-12 rounded-full mr-3 object-cover"
+                              onError={(e) =>
+                                (e.target.src = "/fallback-avatar.png")
+                              }
+                            />
+                            {isOnline && (
+                              <div className="absolute bottom-0 right-2 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                            )}
+                          </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
                               <h3 className="font-medium truncate">
                                 {otherUser.name}
                               </h3>
                               <span className="text-xs text-gray-500 whitespace-nowrap">
-                                {formatTime(conversation.lastMessageAt)}
+                                {formatTime(
+                                  conversation.lastMessageAt ||
+                                    conversation.updatedAt
+                                )}
                               </span>
                             </div>
                             <p className="text-sm text-gray-600 truncate">
                               {conversation.lastMessage?.content ||
                                 "Start a conversation"}
                             </p>
-                            <span className="text-xs text-blue-500">
-                              {otherUser.role}
-                            </span>
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs text-blue-500">
+                                {otherUser.role}
+                              </span>
+                              {isOnline && (
+                                <span className="text-xs text-green-500">
+                                  Online
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -258,46 +598,61 @@ const Chat = () => {
             ) : (
               <div className="p-2">
                 <h3 className="font-medium p-2 mb-1">Available Artists</h3>
-                {artists.length === 0 ? (
+                {displayArtists.length === 0 ? (
                   <div className="p-4 text-center text-gray-500">
                     No artists available
                   </div>
                 ) : (
-                  artists.map((artist) => (
-                    <div
-                      key={artist._id}
-                      onClick={() => startNewConversation(artist)}
-                      className="flex items-center p-3 hover:bg-blue-50 rounded-lg cursor-pointer mb-1"
-                    >
-                      <img
-                        src={artist.img}
-                        alt={artist.name}
-                        className="w-10 h-10 rounded-full mr-3 object-cover"
-                        onError={(e) => (e.target.src = "/fallback-avatar.png")}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate">
-                          {artist.name}
-                        </div>
-                        <div className="text-xs flex items-center gap-2 text-gray-500 truncate">
-                          <FaLocationDot />
-                          {artist.province &&
-                          artist.district &&
-                          artist.sector ? (
-                            <>
-                              {artist.province} / {artist.district} /{" "}
-                              {artist.sector}
-                            </>
-                          ) : (
-                            <span>No Location Provided</span>
+                  displayArtists.map((artist) => {
+                    const isOnline = onlineUsers.includes(artist._id);
+                    return (
+                      <div
+                        key={artist._id}
+                        onClick={() => startNewConversation(artist)}
+                        className="flex items-center p-3 hover:bg-blue-50 rounded-lg cursor-pointer mb-1"
+                      >
+                        <div className="relative">
+                          <img
+                            src={artist.img}
+                            alt={artist.name}
+                            className="w-10 h-10 rounded-full mr-3 object-cover"
+                            onError={(e) =>
+                              (e.target.src = "/fallback-avatar.png")
+                            }
+                          />
+                          {isOnline && (
+                            <div className="absolute bottom-0 right-2 w-2 h-2 bg-green-500 rounded-full border border-white"></div>
                           )}
                         </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium truncate flex items-center gap-2">
+                            {artist.name}
+                            {isOnline && (
+                              <span className="text-xs text-green-500">
+                                Online
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs flex items-center gap-2 text-gray-500 truncate">
+                            <FaLocationDot />
+                            {artist.province &&
+                            artist.district &&
+                            artist.sector ? (
+                              <>
+                                {artist.province} / {artist.district} /{" "}
+                                {artist.sector}
+                              </>
+                            ) : (
+                              <span>No Location Provided</span>
+                            )}
+                          </div>
+                        </div>
+                        <button className="text-blue-500 text-sm font-medium hover:text-blue-700">
+                          Message
+                        </button>
                       </div>
-                      <button className="text-blue-500 text-sm font-medium hover:text-blue-700">
-                        Message
-                      </button>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             )}
@@ -309,39 +664,54 @@ const Chat = () => {
           {activeConversation ? (
             <>
               <div className="p-4 border-b border-gray-200 bg-white">
-                <div className="flex items-center">
-                  {(() => {
-                    const otherUser = activeConversation.participants.find(
-                      (p) => p._id !== userId
-                    );
-                    return (
-                      <>
-                        <img
-                          src={otherUser.img}
-                          alt={otherUser.name}
-                          className="w-10 h-10 rounded-full mr-3 object-cover"
-                          onError={(e) =>
-                            (e.target.src = "/fallback-avatar.png")
-                          }
-                        />
-                        <div>
-                          <h3 className="font-medium">{otherUser.name}</h3>
-                          <p className="text-sm text-gray-500">
-                            {otherUser.role}
-                          </p>
-                        </div>
-                      </>
-                    );
-                  })()}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    {(() => {
+                      const otherUser = activeConversation.participants.find(
+                        (p) => p._id !== userId
+                      );
+                      const isOnline = onlineUsers.includes(otherUser._id);
+
+                      return (
+                        <>
+                          <div className="relative">
+                            <img
+                              src={otherUser.img}
+                              alt={otherUser.name}
+                              className="w-10 h-10 rounded-full mr-3 object-cover"
+                              onError={(e) =>
+                                (e.target.src = "/fallback-avatar.png")
+                              }
+                            />
+                            {isOnline && (
+                              <div className="absolute bottom-0 right-2 w-2 h-2 bg-green-500 rounded-full border border-white"></div>
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="font-medium">{otherUser.name}</h3>
+                            <p className="text-sm text-gray-500">
+                              {otherUser.role} {isOnline && "• Online"}
+                              {!isConnected && " • Connecting..."}
+                            </p>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                  {!isConnected && (
+                    <div className="text-xs text-orange-500 bg-orange-50 px-2 py-1 rounded">
+                      Offline - reconnecting...
+                    </div>
+                  )}
                 </div>
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-                {loading ? (
+                {loading && displayMessages.length === 0 ? (
                   <div className="text-center text-gray-500 py-4">
                     Loading messages...
                   </div>
-                ) : messages.length === 0 ? (
+                ) : displayMessages.length === 0 ? (
                   <div className="text-center text-gray-500 py-8">
                     <MessageCircle
                       size={48}
@@ -350,32 +720,38 @@ const Chat = () => {
                     <p>No messages yet. Start the conversation!</p>
                   </div>
                 ) : (
-                  messages.map((message, index) => {
+                  displayMessages.map((message, index) => {
                     const showDateHeader =
                       index === 0 ||
-                      formatDate(message.createdAt) !==
-                        formatDate(messages[index - 1].createdAt);
+                      formatDate(message.createdAt || message.timestamp) !==
+                        formatDate(
+                          displayMessages[index - 1].createdAt ||
+                            displayMessages[index - 1].timestamp
+                        );
+
+                    const isOwnMessage =
+                      message.sender?._id === userId ||
+                      message.senderId === userId;
+                    const isOptimistic = message.isOptimistic;
 
                     return (
-                      <div key={message._id}>
+                      <div key={message._id || message.timestamp?.getTime()}>
                         {showDateHeader && (
                           <div className="text-center text-xs text-gray-500 my-4">
-                            {formatDate(message.createdAt)}
+                            {formatDate(message.createdAt || message.timestamp)}
                           </div>
                         )}
                         <div
                           className={`flex ${
-                            message.sender._id === userId
-                              ? "justify-end"
-                              : "justify-start"
+                            isOwnMessage ? "justify-end" : "justify-start"
                           }`}
                         >
                           <div
                             className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                              message.sender._id === userId
+                              isOwnMessage
                                 ? "bg-blue-500 text-white"
                                 : "bg-white text-gray-800 border border-gray-200"
-                            }`}
+                            } ${isOptimistic ? "opacity-700" : ""}`}
                           >
                             {message.messageType === "image" &&
                               message.fileUrl && (
@@ -409,7 +785,11 @@ const Chat = () => {
                                 <p className="break-words">{message.content}</p>
                               )}
                             <p className="text-xs mt-1 opacity-75 text-right">
-                              {formatTime(message.createdAt)}
+                              {formatTime(
+                                message.createdAt || message.timestamp
+                              )}
+                              {message.isRead && " • Read"}
+                              {/* {isOptimistic && " • Sending..."} */}
                             </p>
                           </div>
                         </div>
@@ -417,10 +797,30 @@ const Chat = () => {
                     );
                   })
                 )}
+
+                {/* Typing Indicator */}
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="max-w-xs lg:max-w-md px-4 py-2 rounded-lg bg-white text-gray-800 border border-gray-200">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div
+                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.2s" }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.4s" }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* File Preview without File Name */}
+              {/* File Preview */}
               {selectedFile && (
                 <div className="p-3 bg-gray-100 border-t border-gray-200 flex items-center justify-between">
                   <div className="flex items-center">
@@ -466,7 +866,18 @@ const Chat = () => {
                   <input
                     type="text"
                     value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
+                    onChange={(e) => {
+                      setNewMessage(e.target.value);
+                      if (e.target.value.trim()) {
+                        handleTyping();
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage(e);
+                      }
+                    }}
                     placeholder="Type a message..."
                     className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -474,12 +885,17 @@ const Chat = () => {
                   {(newMessage.trim() || selectedFile) && (
                     <button
                       type="submit"
-                      className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                      disabled={loading}
+                      className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 flex items-center gap-2"
                     >
-                      {
-                        loading ? "Sending..." :  <Send size={20} />
-
-                      }
+                      {loading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Sending...
+                        </>
+                      ) : (
+                        <Send size={20} />
+                      )}
                     </button>
                   )}
                 </div>
