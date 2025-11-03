@@ -1,22 +1,24 @@
-import { 
-  MessageCircle, 
-  Star, 
-  Instagram, 
-  Twitter, 
+import {
+  MessageCircle,
+  Star,
+  Instagram,
+  Twitter,
   Phone,
   Mail,
   CheckCircle,
   Calendar,
-  User
-} from 'lucide-react';
+  User,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const ArtistCard = ({ id, name, imgSrc, email, status, role, createdAt }) => {
+  const navigate = useNavigate();
   // Format the join date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short' 
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
     });
   };
 
@@ -26,10 +28,26 @@ const ArtistCard = ({ id, name, imgSrc, email, status, role, createdAt }) => {
   const artworks = Math.floor(Math.random() * 50) + 10;
 
   // Default profile image
-  const defaultImage = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+  const defaultImage =
+    "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+
+  const handleChatClick = (e) => {
+    e.stopPropagation();
+    navigate("/chats", {
+      state: {
+        artistId: id,
+        artistName: name,
+        artistImg: imgSrc || defaultImage,
+        artistRole: role,
+      },
+    });
+  };
 
   return (
-    <div key={id} className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+    <div
+      key={id}
+      className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+    >
       {/* Artist Image */}
       <div className="relative overflow-hidden">
         <img
@@ -40,7 +58,7 @@ const ArtistCard = ({ id, name, imgSrc, email, status, role, createdAt }) => {
             e.target.src = defaultImage;
           }}
         />
-        
+
         {/* Status Badge */}
         <div className="absolute top-4 left-4">
           <div className="flex items-center gap-1 px-3 py-1 bg-green-500 text-white rounded-full text-xs font-medium">
@@ -60,7 +78,10 @@ const ArtistCard = ({ id, name, imgSrc, email, status, role, createdAt }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="absolute bottom-4 left-4 right-4">
             <div className="flex gap-2">
-              <button className="flex-1 px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors flex items-center justify-center gap-2">
+              <button
+                onClick={handleChatClick}
+                className="flex-1 px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors flex items-center justify-center gap-2"
+              >
                 <MessageCircle className="w-4 h-4" />
                 <span className="text-sm">Chat</span>
               </button>
