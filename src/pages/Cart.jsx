@@ -1,12 +1,12 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { useFormik } from "formik";
-import { 
-  ShoppingCart, 
-  CreditCard, 
-  MapPin, 
-  User, 
-  Mail, 
+import {
+  ShoppingCart,
+  CreditCard,
+  MapPin,
+  User,
+  Mail,
   ArrowRight,
   ShoppingBag,
 } from "lucide-react";
@@ -28,8 +28,10 @@ import {
 } from "../components/notifications/notification";
 import Spinner from "../components/Spinner";
 import FlutterwavePayment from "../components/flutterWave/FlutterwavePayment";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const cart = useSelector(selectAllcart);
   const totalPrice = useSelector(selectTotalPrice);
@@ -66,32 +68,41 @@ const Cart = () => {
     onSubmit: async (values) => {
       try {
         setLoading(true);
-        await dispatch(
+        const data = await dispatch(
           makeOrders({
             cartId: cartId,
             shippingAddress: values.shippingAddress,
           })
         ).unwrap();
-        
+
+        console.log("Order created successfully: ", data);
+
         // Show success notification
-        notifySuccess(`Successfully ordered ${totalItems} items. Redirecting to payment...`);
-        
+        notifySuccess(
+          `Successfully ordered ${totalItems} items. Redirecting to payment...`
+        );
+
         // Set order completed flag
-        setOrderCompleted(true);
+        // setOrderCompleted(true);
         setLoading(false);
-        
+
         // Wait 3 seconds before proceeding to payment
-        setIsProceedingToPayment(true);
+        // setIsProceedingToPayment(true);
         // await new Promise(resolve => setTimeout(resolve, 3000));
-        
+
         // After delay, trigger Flutterwave payment
         // This will be handled by the FlutterwavePayment component
-        setIsProceedingToPayment(false);
-        
+        // setIsProceedingToPayment(false);
+
         // Refresh cart
-        await dispatch(getCart());
+
         formik.resetForm();
-        
+
+        // navigate(data.paymentUrl);
+
+        window.location.href = data.paymentUrl;
+        dispatch(getCart());
+        formik.resetForm();
       } catch (error) {
         setLoading(false);
         setOrderCompleted(false);
@@ -104,7 +115,7 @@ const Cart = () => {
   const handlePaymentClick = async (e) => {
     if (!orderCompleted) {
       e.preventDefault();
-      
+
       // Validate form first
       const errors = await formik.validateForm();
       if (Object.keys(errors).length > 0) {
@@ -114,7 +125,7 @@ const Cart = () => {
         // notifyError("Please fill in all required fields");
         return;
       }
-      
+
       // Submit form to create order
       await formik.handleSubmit();
     }
@@ -127,7 +138,9 @@ const Cart = () => {
         <div className="w-32 h-32 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-8">
           <ShoppingCart className="w-16 h-16 text-purple-500" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Cart is Empty</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          Your Cart is Empty
+        </h2>
         <p className="text-gray-600 mb-8">
           Discover amazing artworks and add them to your cart to get started.
         </p>
@@ -158,14 +171,15 @@ const Cart = () => {
               {totalItems} Items in Cart
             </span>
           </div>
-          
+
           <h1 className="text-3xl lg:text-5xl font-bold text-white leading-tight">
             Your Shopping
             <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              {" "}Cart
+              {" "}
+              Cart
             </span>
           </h1>
-          
+
           <p className="text-lg text-gray-300 leading-relaxed max-w-2xl mx-auto">
             Review your selected artworks and complete your purchase securely.
           </p>
@@ -176,8 +190,10 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50">
-      {isModalOpen && <Modal close={() => setIsModalOpen(false)} email={email} />}
-      
+      {isModalOpen && (
+        <Modal close={() => setIsModalOpen(false)} email={email} />
+      )}
+
       <HeroSection />
 
       <div className="container mx-auto px-6 py-12">
@@ -188,13 +204,17 @@ const Cart = () => {
               <div className="bg-white rounded-2xl p-6 shadow-lg">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Order Summary</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Order Summary
+                    </h2>
                     <p className="text-gray-600">
                       Review your items and adjust quantities as needed
                     </p>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-purple-600">{totalItems}</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      {totalItems}
+                    </div>
                     <div className="text-sm text-gray-500">Items</div>
                   </div>
                 </div>
@@ -223,8 +243,12 @@ const Cart = () => {
                     <CreditCard className="w-5 h-5 text-purple-600" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Payment Details</h2>
-                    <p className="text-sm text-gray-600">Complete your purchase</p>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      Payment Details
+                    </h2>
+                    <p className="text-sm text-gray-600">
+                      Complete your purchase
+                    </p>
                   </div>
                 </div>
 
@@ -265,19 +289,24 @@ const Cart = () => {
                         rows="3"
                       />
                     </div>
-                    
-                    {formik.touched.shippingAddress && formik.errors.shippingAddress && (
-                      <div className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">
-                        {formik.errors.shippingAddress}
-                      </div>
-                    )}
+
+                    {formik.touched.shippingAddress &&
+                      formik.errors.shippingAddress && (
+                        <div className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">
+                          {formik.errors.shippingAddress}
+                        </div>
+                      )}
                   </div>
 
                   {/* Order Summary */}
                   <div className="border-t border-gray-200 pt-4 space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Items ({totalItems})</span>
-                      <span className="font-semibold">{totalPrice?.toLocaleString()} frw</span>
+                      <span className="text-gray-600">
+                        Items ({totalItems})
+                      </span>
+                      <span className="font-semibold">
+                        {totalPrice?.toLocaleString()} frw
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Shipping</span>
@@ -285,7 +314,9 @@ const Cart = () => {
                     </div>
                     <div className="border-t border-gray-200 pt-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-lg font-bold text-gray-900">Total</span>
+                        <span className="text-lg font-bold text-gray-900">
+                          Total
+                        </span>
                         <span className="text-2xl font-bold text-purple-600">
                           {totalPrice?.toLocaleString()} frw
                         </span>
@@ -299,11 +330,16 @@ const Cart = () => {
                       <div className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl flex items-center justify-center gap-2">
                         <Spinner classes="!h-6 !w-6 !text-white" />
                         <span>
-                          {isProceedingToPayment ? "Redirecting to payment..." : "Processing..."}
+                          {isProceedingToPayment
+                            ? "Redirecting to payment..."
+                            : "Processing..."}
                         </span>
                       </div>
                     ) : (
-                      <div className="w-full text-white bg-black rounded-md relative" onClick={handlePaymentClick}>
+                      <div
+                        className="w-full text-white bg-black rounded-md relative"
+                        onClick={handlePaymentClick}
+                      >
                         <FlutterwavePayment
                           amount={totalPrice}
                           email={email}
