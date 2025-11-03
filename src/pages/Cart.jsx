@@ -28,10 +28,8 @@ import {
 } from "../components/notifications/notification";
 import Spinner from "../components/Spinner";
 import FlutterwavePayment from "../components/flutterWave/FlutterwavePayment";
-import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const cart = useSelector(selectAllcart);
   const totalPrice = useSelector(selectTotalPrice);
@@ -40,7 +38,6 @@ const Cart = () => {
 
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isProceedingToPayment, setIsProceedingToPayment] = useState(false);
   const [orderCompleted, setOrderCompleted] = useState(false);
 
   const handleRemoveItem = async (productId) => {
@@ -97,9 +94,6 @@ const Cart = () => {
         // Refresh cart
 
         formik.resetForm();
-
-        // navigate(data.paymentUrl);
-
         window.location.href = data.paymentUrl;
         dispatch(getCart());
         formik.resetForm();
@@ -326,11 +320,11 @@ const Cart = () => {
 
                   {/* Payment Button */}
                   <div className="pt-4">
-                    {loading || isProceedingToPayment ? (
+                    {loading ? (
                       <div className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl flex items-center justify-center gap-2">
                         <Spinner classes="!h-6 !w-6 !text-white" />
                         <span>
-                          {isProceedingToPayment
+                          {loading
                             ? "Redirecting to payment..."
                             : "Processing..."}
                         </span>
