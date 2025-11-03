@@ -51,7 +51,11 @@ export const makeOrders = createAsyncThunk(
   "orders/makeOrders ",
   async ({ cartId, shippingAddress }, { rejectWithValue }) => {
     try {
-      const data = { shippingAddress };
+      const data = {
+        shippingAddress,
+        successUrl: "http://localhost:3000",
+        cancelUrl: "http://localhost:3000/fails",
+      };
       const response = await ordersService.create(cartId, data);
       return response.data?.data;
     } catch (error) {
