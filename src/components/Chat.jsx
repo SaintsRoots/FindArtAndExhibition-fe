@@ -16,8 +16,10 @@ import {
   selectUnreadCount,
 } from "../features/chats/chartSlice";
 import { useSocket } from "../context/SocketContext";
+import { useLocation } from "react-router-dom";
 
 const Chat = () => {
+  const location = useLocation();
   const [activeConversation, setActiveConversation] = useState(null);
   const [newMessage, setNewMessage] = useState("");
   const [activeTab, setActiveTab] = useState("messages");
@@ -43,6 +45,23 @@ const Chat = () => {
   const reduxArtists = useSelector(selectArtists);
   const loading = useSelector(selectChatLoading);
   const reduxUnreadCount = useSelector(selectUnreadCount);
+
+  useEffect(() => {
+    if (location.state?.artistId && userId) {
+      const { artistId, artistName, artistImg, artistRole } = location.state;
+
+      const artist = {
+        _id: artistId,
+        name: artistName,
+        img: artistImg,
+        role: artistRole,
+      };
+
+      startNewConversation(artist);
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, userId]);
 
   const {
     socket,
