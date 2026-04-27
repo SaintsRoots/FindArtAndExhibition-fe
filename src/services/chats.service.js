@@ -32,10 +32,16 @@ class ChatDataService {
 
   async sendMessage(messageData) {
     try {
-  
-      const response = await http.post("/messages/sendMessage", messageData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const { sender, receiver, content, messageType, file } = messageData;
+      const formData = new FormData();
+      formData.append("sender", sender);
+      formData.append("receiver", receiver);
+      formData.append("content", content ?? "");
+      formData.append("messageType", messageType);
+      if (file) {
+        formData.append("fileUrl", file);
+      }
+      const response = await http.post("/messages/sendMessage", formData);
       return response.data;
     } catch (error) {
       this.handleError(error, 'send message');

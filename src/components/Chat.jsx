@@ -18,6 +18,48 @@ import {
 import { useSocket } from "../context/SocketContext";
 import { useLocation } from "react-router-dom";
 
+const API_ORIGIN = (process.env.REACT_APP_API_URL || "").replace(/\/$/, "");
+
+/** Turn relative upload paths into absolute URLs so production <img> hits the API host, not the SPA host. */
+function resolveMediaUrl(url) {
+  if (url == null || url === "") return url;
+  if (typeof url !== "string") return url;
+  if (/^https?:\/\//i.test(url)) return url;
+  if (url.startsWith("/")) return `${API_ORIGIN}${url}`;
+  return url;
+}
+
+/** Normalize Mongo / API user ids (string, {_id}, {id}) so comparisons match across accounts. */
+function entityId(value) {
+  if (value == null || value === "") return "";
+  if (typeof value === "string") return value;
+  const raw = value._id ?? value.id;
+  return raw != null ? String(raw) : "";
+}
+
+function otherParticipant(participants, currentUserId) {
+  if (!participants?.length || currentUserId == null) return null;
+  const me = String(currentUserId);
+  const found = participants.find((p) => {
+    const pid = entityId(p);
+    return pid !== "" && pid !== me;
+  });
+  return found ?? null;
+}
+
+function messageSenderId(message) {
+  if (!message) return "";
+  if (message.senderId != null) return String(message.senderId);
+  if (typeof message.sender === "string") return message.sender;
+  return entityId(message.sender);
+}
+
+function isUserOnline(onlineUsers, userRef) {
+  const id = entityId(userRef);
+  if (!id) return false;
+  return onlineUsers.some((oid) => String(oid) === id);
+}
+
 const Chat = () => {
   const location = useLocation();
   const [activeConversation, setActiveConversation] = useState(null);
@@ -142,10 +184,15 @@ const Chat = () => {
 
     socket.on("messages:loaded", (data) => {
       if (activeConversation) {
-        const otherUser = activeConversation.participants.find(
-          (p) => p._id !== userId
+        const otherUser = otherParticipant(
+          activeConversation.participants,
+          userId
         );
-        if (otherUser && data.otherUserId === otherUser._id) {
+        if (
+          otherUser &&
+          data.otherUserId != null &&
+          String(data.otherUserId) === entityId(otherUser)
+        ) {
           setLocalMessages(data.messages);
         }
       }
@@ -162,11 +209,12 @@ const Chat = () => {
     socket.on("conversation:created", (conversation) => {
       setActiveConversation(conversation);
       setActiveTab("messages");
-      const otherUser = conversation.participants.find((p) => p._id !== userId);
+      const otherUser = otherParticipant(conversation.participants, userId);
       if (otherUser) {
-        setSocketCurrentConversation(otherUser._id);
+        const oid = entityId(otherUser);
+        setSocketCurrentConversation(oid);
         // Load messages for the new conversation
-        socket.emit("messages:load", { otherUserId: otherUser._id });
+        socket.emit("messages:load", { otherUserId: oid });
       }
     });
 
@@ -183,27 +231,28 @@ const Chat = () => {
   // Set current conversation and load messages when active conversation changes
   useEffect(() => {
     if (activeConversation && userId) {
-      const otherUser = activeConversation.participants.find(
-        (p) => p._id !== userId
+      const otherUser = otherParticipant(
+        activeConversation.participants,
+        userId
       );
       if (otherUser) {
-        setSocketCurrentConversation(otherUser._id);
+        const oid = entityId(otherUser);
+        setSocketCurrentConversation(oid);
 
         // Load messages via socket if connected, otherwise use Redux
         if (socket && isConnected) {
-          socket.emit("messages:load", { otherUserId: otherUser._id });
+          socket.emit("messages:load", { otherUserId: oid });
         } else {
-          dispatch(
-            getMessagesBetweenUsers({ userId, otherUserId: otherUser._id })
-          );
+          dispatch(getMessagesBetweenUsers({ userId, otherUserId: oid }));
         }
 
         // Mark messages as read when opening conversation
         const messagesToMark =
           localMessages.length > 0 ? localMessages : reduxMessages;
         messagesToMark.forEach((message) => {
-          if (message.sender._id !== userId && !message.isRead) {
-            markMessageAsRead(message._id, message.sender._id);
+          const sid = messageSenderId(message);
+          if (sid && sid !== String(userId) && !message.isRead && message._id) {
+            markMessageAsRead(message._id, sid);
           }
         });
       }
@@ -221,10 +270,11 @@ const Chat = () => {
   // Handle typing indicators
   useEffect(() => {
     if (activeConversation) {
-      const otherUser = activeConversation.participants.find(
-        (p) => p._id !== userId
+      const otherUser = otherParticipant(
+        activeConversation.participants,
+        userId
       );
-      if (otherUser && typingUsers.has(otherUser._id)) {
+      if (otherUser && typingUsers.has(entityId(otherUser))) {
         setIsTyping(true);
 
         // Clear existing timeout
@@ -258,57 +308,66 @@ const Chat = () => {
     e.preventDefault();
     if ((!newMessage.trim() && !selectedFile) || !activeConversation) return;
 
-    const otherUser = activeConversation.participants.find(
-      (p) => p._id !== userId
+    const otherUser = otherParticipant(
+      activeConversation.participants,
+      userId
     );
     if (!otherUser) return;
 
     // Stop typing indicator
-    socketStopTyping(otherUser._id);
+    socketStopTyping(entityId(otherUser));
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = null;
     }
 
     try {
-      // Use socket for real-time messaging (preferred)
-      if (isConnected && socket) {
-        socketSendMessage(
-          otherUser._id,
-          newMessage.trim(),
-          selectedFile ? "file" : "text"
-        );
+      const messageType = selectedFile
+        ? selectedFile.type.startsWith("image/")
+          ? "image"
+          : "file"
+        : "text";
 
-        // Optimistically add message to local state
+      // Attachments must go through REST + multipart; socket only sends text metadata (no file bytes).
+      const oid = entityId(otherUser);
+      if (selectedFile) {
+        await dispatch(
+          sendMessageAPI({
+            sender: userId,
+            receiver: oid,
+            content: newMessage.trim(),
+            messageType,
+            file: selectedFile,
+          })
+        ).unwrap();
+        dispatch(getUserConversations(userId));
+        dispatch(getMessagesBetweenUsers({ userId, otherUserId: oid }));
+      } else if (isConnected && socket) {
+        socketSendMessage(oid, newMessage.trim(), "text");
+
         const optimisticMessage = {
-          _id: Date.now().toString(), // Temporary ID
+          _id: Date.now().toString(),
           senderId: userId,
           senderName: userName,
           senderImg: userProfile,
-          receiverId: otherUser._id,
+          receiverId: oid,
           content: newMessage.trim(),
-          messageType: selectedFile ? "file" : "text",
+          messageType: "text",
           timestamp: new Date(),
           isRead: false,
-          isOptimistic: true, // Flag to identify optimistic messages
+          isOptimistic: true,
         };
 
         setLocalMessages((prev) => [...prev, optimisticMessage]);
       } else {
-        // Fallback to API
-        const messageData = {
-          sender: userId,
-          receiver: otherUser._id,
-          content: newMessage.trim(),
-          messageType: selectedFile
-            ? selectedFile.type.startsWith("image/")
-              ? "image"
-              : "file"
-            : "text",
-          fileUrl: selectedFile || null,
-        };
-
-        await dispatch(sendMessageAPI(messageData)).unwrap();
+        await dispatch(
+          sendMessageAPI({
+            sender: userId,
+            receiver: oid,
+            content: newMessage.trim(),
+            messageType: "text",
+          })
+        ).unwrap();
         dispatch(getUserConversations(userId));
       }
 
@@ -324,13 +383,15 @@ const Chat = () => {
   const handleTyping = () => {
     if (!activeConversation || !isConnected) return;
 
-    const otherUser = activeConversation.participants.find(
-      (p) => p._id !== userId
+    const otherUser = otherParticipant(
+      activeConversation.participants,
+      userId
     );
     if (!otherUser) return;
 
+    const oid = entityId(otherUser);
     // Start typing
-    socketStartTyping(otherUser._id);
+    socketStartTyping(oid);
 
     // Clear existing timeout
     if (typingTimeoutRef.current) {
@@ -339,28 +400,30 @@ const Chat = () => {
 
     // Set timeout to stop typing
     typingTimeoutRef.current = setTimeout(() => {
-      socketStopTyping(otherUser._id);
+      socketStopTyping(oid);
     }, 3000);
   };
 
   const startNewConversation = async (artist) => {
     try {
+      const aid = entityId(artist);
+      if (!aid) return;
       if (socket && isConnected) {
         // Use socket to create conversation in real-time
-        socket.emit("conversation:create", { otherUserId: artist._id });
+        socket.emit("conversation:create", { otherUserId: aid });
       } else {
         // Fallback to Redux
         const result = await dispatch(
           getOrCreateConversation({
             userId1: userId,
-            userId2: artist._id,
+            userId2: aid,
           })
         ).unwrap();
 
         setActiveConversation(result);
         setActiveTab("messages");
-        setSocketCurrentConversation(artist._id);
-        handleLoadMessages(artist._id);
+        setSocketCurrentConversation(aid);
+        handleLoadMessages(aid);
       }
     } catch (error) {
       console.error("Error starting conversation:", error);
@@ -369,10 +432,11 @@ const Chat = () => {
 
   const handleSelectConversation = (conversation) => {
     setActiveConversation(conversation);
-    const otherUser = conversation.participants.find((p) => p._id !== userId);
+    const otherUser = otherParticipant(conversation.participants, userId);
     if (otherUser) {
-      setSocketCurrentConversation(otherUser._id);
-      handleLoadMessages(otherUser._id);
+      const oid = entityId(otherUser);
+      setSocketCurrentConversation(oid);
+      handleLoadMessages(oid);
     }
     setActiveTab("messages");
   };
@@ -417,10 +481,13 @@ const Chat = () => {
   const getDisplayMessages = () => {
     if (!activeConversation) return [];
 
-    const otherUser = activeConversation.participants.find(
-      (p) => p._id !== userId
+    const otherUser = otherParticipant(
+      activeConversation.participants,
+      userId
     );
     if (!otherUser) return [];
+
+    const otherOid = entityId(otherUser);
 
     // Get messages from all sources
     const apiMessages = reduxMessages || [];
@@ -435,7 +502,7 @@ const Chat = () => {
       if (msg._id) {
         messageMap.set(msg._id, {
           ...msg,
-          senderId: msg.sender?._id,
+          senderId: msg.sender?._id ?? msg.sender?.id ?? msg.senderId,
           timestamp: msg.createdAt,
         });
       }
@@ -445,16 +512,17 @@ const Chat = () => {
     socketMessages.forEach((msg) => {
       if (
         msg._id &&
-        (msg.senderId === otherUser._id ||
-          (msg.senderId === userId && msg.receiverId === otherUser._id))
+        (String(msg.senderId) === otherOid ||
+          (String(msg.senderId) === String(userId) &&
+            String(msg.receiverId) === otherOid))
       ) {
         messageMap.set(msg._id, {
           ...msg,
           sender:
-            msg.senderId === userId
+            String(msg.senderId) === String(userId)
               ? { _id: userId, name: userName, img: userProfile }
               : {
-                  _id: otherUser._id,
+                  _id: otherOid,
                   name: otherUser.name,
                   img: otherUser.img,
                 },
@@ -467,16 +535,17 @@ const Chat = () => {
     localMessagesList.forEach((msg) => {
       if (
         msg._id &&
-        (msg.senderId === otherUser._id ||
-          (msg.senderId === userId && msg.receiverId === otherUser._id))
+        (String(msg.senderId) === otherOid ||
+          (String(msg.senderId) === String(userId) &&
+            String(msg.receiverId) === otherOid))
       ) {
         messageMap.set(msg._id, {
           ...msg,
           sender:
-            msg.senderId === userId
+            String(msg.senderId) === String(userId)
               ? { _id: userId, name: userName, img: userProfile }
               : {
-                  _id: otherUser._id,
+                  _id: otherOid,
                   name: otherUser.name,
                   img: otherUser.img,
                 },
@@ -552,10 +621,12 @@ const Chat = () => {
                   </div>
                 ) : (
                   displayConversations.map((conversation) => {
-                    const otherUser = conversation.participants.find(
-                      (p) => p._id !== userId
+                    const otherUser = otherParticipant(
+                      conversation.participants,
+                      userId
                     );
-                    const isOnline = onlineUsers.includes(otherUser._id);
+                    if (!otherUser) return null;
+                    const isOnline = isUserOnline(onlineUsers, otherUser);
 
                     return (
                       <div
@@ -570,7 +641,7 @@ const Chat = () => {
                         <div className="flex items-center">
                           <div className="relative">
                             <img
-                              src={otherUser.img}
+                              src={resolveMediaUrl(otherUser.img)}
                               alt={otherUser.name}
                               className="w-12 h-12 rounded-full mr-3 object-cover"
                               onError={(e) =>
@@ -623,16 +694,17 @@ const Chat = () => {
                   </div>
                 ) : (
                   displayArtists.map((artist) => {
-                    const isOnline = onlineUsers.includes(artist._id);
+                    const aid = entityId(artist);
+                    const isOnline = isUserOnline(onlineUsers, artist);
                     return (
                       <div
-                        key={artist._id}
+                        key={aid || artist.name}
                         onClick={() => startNewConversation(artist)}
                         className="flex items-center p-3 hover:bg-blue-50 rounded-lg cursor-pointer mb-1"
                       >
                         <div className="relative">
                           <img
-                            src={artist.img}
+                            src={resolveMediaUrl(artist.img)}
                             alt={artist.name}
                             className="w-10 h-10 rounded-full mr-3 object-cover"
                             onError={(e) =>
@@ -686,16 +758,18 @@ const Chat = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     {(() => {
-                      const otherUser = activeConversation.participants.find(
-                        (p) => p._id !== userId
+                      const otherUser = otherParticipant(
+                        activeConversation.participants,
+                        userId
                       );
-                      const isOnline = onlineUsers.includes(otherUser._id);
+                      if (!otherUser) return null;
+                      const isOnline = isUserOnline(onlineUsers, otherUser);
 
                       return (
                         <>
                           <div className="relative">
                             <img
-                              src={otherUser.img}
+                              src={resolveMediaUrl(otherUser.img)}
                               alt={otherUser.name}
                               className="w-10 h-10 rounded-full mr-3 object-cover"
                               onError={(e) =>
@@ -749,8 +823,8 @@ const Chat = () => {
                         );
 
                     const isOwnMessage =
-                      message.sender?._id === userId ||
-                      message.senderId === userId;
+                      messageSenderId(message) === String(userId) ||
+                      String(message.senderId) === String(userId);
                     const isOptimistic = message.isOptimistic;
 
                     return (
@@ -776,7 +850,7 @@ const Chat = () => {
                               message.fileUrl && (
                                 <div className="mb-2">
                                   <img
-                                    src={message.fileUrl}
+                                    src={resolveMediaUrl(message.fileUrl)}
                                     alt="Shared content"
                                     className="max-w-full max-h-64 h-auto rounded object-contain"
                                     onError={(e) =>
@@ -790,7 +864,7 @@ const Chat = () => {
                                 <div className="mb-2 flex items-center">
                                   <FileText size={16} className="mr-2" />
                                   <a
-                                    href={message.fileUrl}
+                                    href={resolveMediaUrl(message.fileUrl)}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-blue-600 hover:text-blue-800 underline"
