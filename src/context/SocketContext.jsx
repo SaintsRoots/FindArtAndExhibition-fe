@@ -110,7 +110,13 @@ export default function SocketProvider({ children }) {
       setConversations((prev) => {
         const updatedConversations = [...prev];
         const convIndex = updatedConversations.findIndex((conv) =>
-          conv.participants.some((p) => p.id === message.senderId)
+          conv.participants.some((p) => {
+            const pid = p._id ?? p.id;
+            return (
+              pid != null &&
+              String(pid) === String(message.senderId)
+            );
+          })
         );
 
         if (convIndex !== -1) {
