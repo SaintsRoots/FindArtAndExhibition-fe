@@ -47,6 +47,8 @@ export const getOrdersCustomer = createAsyncThunk(
   }
 );
 
+// adding redirect url to the order
+
 export const makeOrders = createAsyncThunk(
   "orders/makeOrders ",
   async ({ cartId, shippingAddress }, { rejectWithValue }) => {
