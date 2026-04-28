@@ -47,14 +47,16 @@ export const getOrdersCustomer = createAsyncThunk(
   }
 );
 
+// adding redirect url to the order
+
 export const makeOrders = createAsyncThunk(
   "orders/makeOrders ",
   async ({ cartId, shippingAddress }, { rejectWithValue }) => {
     try {
       const data = {
         shippingAddress,
-        successUrl: "http://localhost:3000",
-        cancelUrl: "http://localhost:3000/fails",
+        successUrl: "https://artfinderandexhibition.netlify.app/",
+        cancelUrl: "https://artfinderandexhibition.netlify.app/fails",
       };
       const response = await ordersService.create(cartId, data);
       return response.data?.data;
